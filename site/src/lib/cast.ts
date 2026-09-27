@@ -6,7 +6,7 @@ import {
   type AnimalAvatarType,
 } from "cute-avatars"
 
-export const GITHUB_URL = "https://github.com/kylemclaren/animal-avatars"
+export const GITHUB_URL = "https://github.com/kylemclaren/cute-avatars"
 export const BOT_AVATARS_URL =
   "https://github.com/Jakubantalik/Libraries.dev/tree/main/packages/bot-avatars"
 export const INSTALL_COMMAND = "npm install cute-avatars"

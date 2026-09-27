@@ -63,10 +63,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kylemclaren/animal-avatars.git"
+    "url": "git+https://github.com/kylemclaren/cute-avatars.git"
   },
   "bugs": {
-    "url": "https://github.com/kylemclaren/animal-avatars/issues"
+    "url": "https://github.com/kylemclaren/cute-avatars/issues"
   },
   "homepage": "https://animal-avatars.fly.dev"
 }
