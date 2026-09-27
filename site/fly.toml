@@ -1,0 +1,17 @@
+# The demo site: static files behind nginx. Deploy from site/ with
+#   (cd .. && npm run build) && bun run build && fly deploy
+app = "animal-avatars"
+primary_region = "iad"
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

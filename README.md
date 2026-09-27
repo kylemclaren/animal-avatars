@@ -8,6 +8,8 @@
 
 Animated animal avatars for React. Twelve glossy 3D animals, from a tiger to a whale, with living faces that blink, look toward the pointer, turn, hop and fall asleep. Drawn on a 2D canvas, no WebGL.
 
+**[Try them live →](https://animal-avatars.fly.dev)** Play with every prop, see them in a chat and a team list, and read the API.
+
 ```bash
 npm install animal-avatars
 ```
@@ -79,6 +81,13 @@ npm run dev        # the demo at http://localhost:5182
 npm run typecheck
 npm run build
 npm run shapes     # regenerate src/shapes.ts from scripts/gen-shapes.mjs
+```
+
+The demo site lives in `site/` and is deployed to [animal-avatars.fly.dev](https://animal-avatars.fly.dev) on Fly.io. It serves the built files with nginx:
+
+```bash
+npm run build                  # the library first: the site takes its types from dist/
+cd site && bun install && bun run build && fly deploy
 ```
 
 The animated hero comes from `demo/hero-gif.html`, which draws every frame on a canvas. To re-record it, run `npm run dev` and `npm run hero` (a small server that collects the frames), then open `http://localhost:5182/hero-gif.html?theme=dark&sink=http://localhost:5199` and the same with `theme=light`. Each writes `docs/hero-<theme>.gif` with ffmpeg and gifsicle. Without `sink`, the page just plays the scene live.
