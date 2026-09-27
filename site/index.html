@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>animal-avatars: living animal avatars for React</title>
+    <meta
+      name="description"
+      content="Cute, glossy, living animal avatars for React. They blink, follow the pointer, hop, think, work and fall asleep. Drawn on a 2D canvas, no WebGL."
+    />
+    <meta name="theme-color" content="#0E0C1A" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F8F5FF" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      /* the theme before first paint, so a light-mode visitor never sees
+         the night sky flash (ThemeProvider takes over after mount) */
+      ;(function () {
+        try {
+          var t = localStorage.getItem("theme")
+          var dark =
+            t === "dark" ||
+            ((!t || t === "system") &&
+              matchMedia("(prefers-color-scheme: dark)").matches)
+          document.documentElement.classList.add(dark ? "dark" : "light")
+        } catch (e) {
+          document.documentElement.classList.add("dark")
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
