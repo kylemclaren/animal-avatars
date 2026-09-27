@@ -13,7 +13,11 @@ export type AnimalAvatarType =
   | 'octopus'
   | 'owl'
   | 'sheep'
-  | 'whale';
+  | 'whale'
+  | 'monkey'
+  | 'llama'
+  | 'koala'
+  | 'fox';
 
 /**
  * What the face is made of: the eyes alone, or the eyes and the animal's

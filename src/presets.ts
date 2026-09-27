@@ -1,7 +1,7 @@
 import type { AnimalAvatarFace, AnimalAvatarPreset, AnimalAvatarState, AnimalAvatarType } from './types';
 
 /**
- * The twelve animals: each has its own colour, says where on its head the
+ * The sixteen animals: each has its own colour, says where on its head the
  * face sits, and brings its own dome, eyes and mouth.
  */
 export const animalAvatarPresets: Record<AnimalAvatarType, AnimalAvatarPreset> = {
@@ -17,6 +17,10 @@ export const animalAvatarPresets: Record<AnimalAvatarType, AnimalAvatarPreset> =
   owl: { label: 'Owl', color: '#B07A51', face: 'mouth', faceX: 50, faceY: 56, faceScale: 0.95, dome: { cx: 50, cy: 57, rx: 37, ry: 34, bulge: 14 }, mouth: { style: 'beak', y: 59.5, width: 4.6, height: 8, color: '#FFB23F', shade: '#E3861E' }, eyes: { size: 1, tall: 0.78, gap: 1.095, y: -1, shine: 2, color: '#2A1C12' } },
   sheep: { label: 'Sheep', color: '#FFF7EA', face: 'mouth', faceX: 50, faceY: 62, faceScale: 0.88, partsColor: '#EBB894', partsDepth: 0.45, dome: { cx: 50, cy: 58, rx: 34, ry: 32, bulge: 14 }, mouth: { style: 'animal', y: 73.3 }, eyes: { size: 0.72, tall: 0.75, gap: 0.93, y: -0.5, shine: 1 } },
   whale: { label: 'Whale', color: '#4AAEF0', face: 'mouth', faceX: 44, faceY: 55, faceScale: 0.95, partsColor: '#BFEAFF', dome: { cx: 44, cy: 58, rx: 35, ry: 29, bulge: 13 }, mouth: { style: 'smile', y: 66, width: 9 }, eyes: { size: 0.8, tall: 0.72, gap: 1.01, y: -1, shine: 1 } },
+  monkey: { label: 'Monkey', color: '#9C6A48', face: 'mouth', faceX: 50, faceY: 53, faceScale: 0.9, dome: { cx: 50, cy: 56, rx: 32, ry: 31, bulge: 13 }, mouth: { style: 'smile', y: 70, width: 7 }, eyes: { size: 0.78, tall: 0.72, gap: 0.89, y: -1, shine: 1 } },
+  llama: { label: 'Llama', color: '#D9A877', face: 'mouth', faceX: 50, faceY: 56, faceScale: 0.88, dome: { cx: 50, cy: 61, rx: 27, ry: 30, bulge: 12 }, mouth: { style: 'animal', y: 75.1 }, eyes: { size: 0.78, tall: 0.75, gap: 1, y: -1, shine: 2 } },
+  koala: { label: 'Koala', color: '#A9A6B3', face: 'mouth', faceX: 50, faceY: 55, faceScale: 0.9, dome: { cx: 50, cy: 58, rx: 34, ry: 30, bulge: 13 }, mouth: { style: 'animal', y: 72.5 }, eyes: { size: 0.7, tall: 0.75, gap: 1.3, y: -1, shine: 1 } },
+  fox: { label: 'Fox', color: '#F26B3A', face: 'mouth', faceX: 50, faceY: 55, faceScale: 0.9, dome: { cx: 50, cy: 58, rx: 34, ry: 28, bulge: 13 }, mouth: { style: 'animal', y: 81.3 }, eyes: { size: 0.76, tall: 0.7, gap: 1.15, y: -1, shine: 1 } },
 };
 
 export const animalAvatarTypes = Object.keys(animalAvatarPresets) as AnimalAvatarType[];

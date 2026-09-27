@@ -1,7 +1,7 @@
 {
   "name": "animal-avatars",
   "version": "0.1.0",
-  "description": "Animated animal avatars for React: twelve glossy 3D animals, from a tiger to a whale, with living faces that turn, hop and sleep. 2D canvas, no WebGL.",
+  "description": "Animated animal avatars for React: sixteen glossy 3D animals, from a tiger to a whale, with living faces that turn, hop and sleep. 2D canvas, no WebGL.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.es.js",
