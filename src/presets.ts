@@ -21,7 +21,7 @@ export const animalAvatarPresets: Record<AnimalAvatarType, AnimalAvatarPreset> =
 
 export const animalAvatarTypes = Object.keys(animalAvatarPresets) as AnimalAvatarType[];
 export const animalAvatarFaces: AnimalAvatarFace[] = ['eyes', 'mouth'];
-export const animalAvatarStates: AnimalAvatarState[] = ['default', 'working', 'sleeping'];
+export const animalAvatarStates: AnimalAvatarState[] = ['default', 'working', 'thinking', 'happy', 'sleeping'];
 
 /** Colour by animal — the palette on its own. */
 export const animalAvatarPalette: Record<AnimalAvatarType, string> = Object.fromEntries(
@@ -32,4 +32,6 @@ export const stateLabels: Record<AnimalAvatarState, string> = {
   default: 'idle',
   working: 'working',
   sleeping: 'sleeping',
+  thinking: 'thinking',
+  happy: 'happy',
 };

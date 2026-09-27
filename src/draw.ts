@@ -502,7 +502,61 @@ export function draw(ctx: CanvasRenderingContext2D, box: number, pose: Pose, cfg
   }
   /* the near half of the whirl passes in front of the face */
   drawWhirl(ctx, pose, cfg.color, lx, ly, true, cfg.whirl);
+  ctx.setTransform(body[0], body[1], body[2], body[3], body[4], body[5]);
+  drawFlourishes(ctx, pose, cfg.theme);
   ctx.restore();
+}
+
+/* Each state's own touch, beside the head rather than on it, in the
+   body's space (the 100×100 box, centred): thinking trails three thought
+   bubbles up to the right, pulsing in turn like a typing indicator, the
+   small one first as the state comes in; happy twinkles four sparkles
+   round the head, each on its own beat. */
+const BUBBLES = [[86, 6, 2.8], [95, -2.5, 3.9], [105.5, -12, 5.2]];
+const SPARKLES = [[6, 8, 8, 0], [95, 10, 6.4, 0.35], [-3, 50, 6.8, 0.62], [104, 58, 5.6, 0.15], [50, -8, 5, 0.8]];
+function drawFlourishes(ctx: CanvasRenderingContext2D, pose: Pose, theme: DrawConfig['theme']) {
+  const [, , , wt, wh] = pose.w;
+  const T = pose.time;
+  if (wt > 0.01) {
+    ctx.fillStyle = theme === 'light' ? 'rgba(40,32,70,0.5)' : 'rgba(255,255,255,0.9)';
+    BUBBLES.forEach(([x, y, r], i) => {
+      const grow = Math.max(0, Math.min(1, (wt - i * 0.2) / 0.6));
+      if (grow <= 0) return;
+      const k = 0.5 + 0.5 * Math.sin(Math.PI * 2 * (T * 0.8 - i * 0.2));
+      ctx.globalAlpha = grow * (0.55 + 0.45 * k);
+      ctx.beginPath();
+      ctx.arc(x - 50, y - 50, r * (0.85 + 0.2 * k) * grow, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+  if (wh > 0.01) {
+    for (const [x, y, r, off] of SPARKLES) {
+      /* twinkle once a cycle: grow, turn a little, go */
+      const c = (((T / 1.5 + off) % 1) + 1) % 1;
+      const s = c < 0.55 ? Math.sin((Math.PI * c) / 0.55) : 0;
+      const R = r * s * wh;
+      if (R < 0.2) continue;
+      ctx.save();
+      ctx.translate(x - 50, y - 50);
+      ctx.rotate(c * 1.4);
+      const k = R * 0.14;
+      ctx.beginPath();
+      ctx.moveTo(0, -R);
+      ctx.quadraticCurveTo(k, -k, R, 0);
+      ctx.quadraticCurveTo(k, k, 0, R);
+      ctx.quadraticCurveTo(-k, k, -R, 0);
+      ctx.quadraticCurveTo(-k, -k, 0, -R);
+      /* a deeper gold on a light surface, where the bright one washes out */
+      ctx.fillStyle = theme === 'light' ? '#F2A600' : '#FFD24A';
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(0, 0, R * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
 }
 
 /* Radius of the sphere the face is drawn on, in body units. */
@@ -551,7 +605,7 @@ function eyePath(x0: number, y0: number, cy: number): Path2D {
 type Place = (x: number, y: number) => { x: number; y: number; sx: number; sy: number; z: number };
 
 function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, place: Place | undefined, minLine: number) {
-  const [wd, ww, ws] = pose.w;
+  const [wd, ww, ws, wt, wh] = pose.w;
   const ink = cfg.ink;
   const es = cfg.eyes ?? {};
   const eSize = es.size ?? 1, eTall = es.tall ?? 1, shine = es.shine ?? 0, shineSize = es.shineSize ?? 1;
@@ -588,8 +642,9 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
   const side = Math.abs(past(clamp1(pose.lookX / 4.5), 0.4));
   const tall = Math.max(0.3, 1 + 0.55 * up - 0.1 * side);
   const wide = 1 - 0.05 * up + 0.12 * side;
-  const open = wd + ww * (1 - pose.laugh);
-  const laugh = ww * pose.laugh;
+  /* thinking looks with open eyes; working and happy laugh them shut */
+  const open = wd + wt + (ww + wh) * (1 - pose.laugh);
+  const laugh = (ww + wh) * pose.laugh;
   const lift = Math.max(0, -pose.y) / 26;
   const sag = 0.5 + 0.5 * pose.breath;
   for (const side of [-1, 1] as const) {
@@ -631,11 +686,14 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
        a switch morphs rather than swaps; working, a little open mouth
        drops under the line, deeper at the top of a hop. A beak is a
        feature rather than an expression, so it shows with either face. */
-    const b = (d: number, w: number, s: number) => wd * d + ww * w + ws * s;
+    const b = (d: number, w: number, s: number, t: number, h: number) => wd * d + ww * w + ws * s + wt * t + wh * h;
     const kd = 1 + 0.08 * pose.breath;
     const hop = Math.max(0, -pose.y) / 26;
-    const open = ww * (5.6 + 4 * hop);
-    const lw = Math.max(minLine, b(1.55, 1.6, 1.35));
+    /* working opens the mouth with each hop; happy beams, wider still */
+    const open = ww * (5.6 + 4 * hop) + wh * (4.8 + 4 * hop);
+    const lw = Math.max(minLine, b(1.55, 1.6, 1.35, 1.5, 1.6));
+    /* thinking pulls the mouth small and off to the side it looks to */
+    const hmm = wt * Math.max(-1, Math.min(1, lx / 3));
     const ay = (mo.y - cfg.faceY) / cfg.faceScale;
     const pocketFill = (pocket: Path2D, ty: number, tw: number) => {
       ctx.fillStyle = mo.inside ?? '#5B1F2B';
@@ -650,9 +708,9 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
     };
     if (mo.style === 'smile') {
       /* a long, gentle smile with its corners tucked up: a chameleon's */
-      const sw = (mo.width ?? 14) * b(kd, 1.05, 0.8);
-      const sag = b(3.2, 2.2, 1.2);
-      at(lx * 0.2, ay, () => {
+      const sw = (mo.width ?? 14) * b(kd, 1.05, 0.8, 0.5, 1.15);
+      const sag = b(3.2, 2.2, 1.2, 0.8, 3.6);
+      at(lx * 0.2 + hmm * (mo.width ?? 14) * 0.3, ay, () => {
         if (open > 0.3) {
           const pocket = new Path2D();
           pocket.moveTo(-sw * 0.7, sag * 0.55);
@@ -674,10 +732,10 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
     } else if (mo.style === 'animal') {
       /* a short line down from the nose, then two small curves out to
          either side, the "ω" */
-      const hw = b(5.4 * kd, 6, 3.8);
-      const dip = b(2.5 * kd, 2.2, 1.2);
-      const ph = b(2.2, 1.8, 1.4);
-      at(lx * 0.2, ay, () => {
+      const hw = b(5.4 * kd, 6, 3.8, 3.4, 6.6);
+      const dip = b(2.5 * kd, 2.2, 1.2, 1, 2.9);
+      const ph = b(2.2, 1.8, 1.4, 1.9, 2);
+      at(lx * 0.2 + hmm * 1.6, ay, () => {
         if (open > 0.3) {
           const w2 = hw * 0.62, y0 = ph + dip * 0.55;
           const pocket = new Path2D();
@@ -723,7 +781,7 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
       /* A two-tone beak: the lower half tucked under the upper, its tip
          peeking out below; working, it drops open on the dark inside. */
       const bw = mo.width ?? 4.5, bh = mo.height ?? 5.5;
-      const gape = ww * (2.4 + 2.6 * hop);
+      const gape = ww * (2.4 + 2.6 * hop) + wh * (2 + 2.6 * hop);
       at(lx * 0.2, ay, () => {
         if (gape > 0.2) {
           ctx.fillStyle = mo.inside ?? '#5B1F2B';

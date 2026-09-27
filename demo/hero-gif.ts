@@ -10,6 +10,7 @@ import {
   AnimalAvatarSim,
   drawAnimalAvatarFrame,
   animalAvatarTypes,
+  animalAvatarStates,
   animalAvatarPresets,
   animalAvatarShapes,
   animalAvatarParts,
@@ -64,7 +65,7 @@ for (let row = -1; row <= 5; row++) {
   for (let col = -1; col <= 9; col++) {
     const n = (row + 1) * 11 + col + 1;
     const type = animalAvatarTypes[(((col + row * 5) % animalAvatarTypes.length) + animalAvatarTypes.length) % animalAvatarTypes.length];
-    const state: AnimalAvatarState = n % 9 === 4 ? 'sleeping' : n % 7 === 2 ? 'working' : 'default';
+    const state: AnimalAvatarState = n % 9 === 4 ? 'sleeping' : n % 7 === 2 ? 'working' : n % 10 === 7 ? 'thinking' : n % 8 === 1 ? 'happy' : 'default';
     const p = animalAvatarPresets[type];
     const sim = new AnimalAvatarSim((n * 0.6180339) % 1, state);
     /* desynchronise: each starts a different way into its own life */
@@ -78,7 +79,7 @@ for (let row = -1; row <= 5; row++) {
       canvas,
       cfg: {
         path: new Path2D(animalAvatarShapes[type]), face: p.face, faceX: p.faceX, faceY: p.faceY, faceScale: p.faceScale,
-        color: p.color, ink: autoInk(p.color), shading: 'plastic', typeKey: type, still: true, dpr: 1,
+        color: p.color, ink: autoInk(p.color), shading: 'plastic', typeKey: type, still: true, dpr: 1, theme,
         parts: animalAvatarParts[type] ? new Path2D(animalAvatarParts[type] as string) : undefined, partsColor: p.partsColor, partsDepth: p.partsDepth,
         markings: animalAvatarMarkings[type], dome: p.dome, eyes: p.eyes, mouth: p.mouth,
       },
@@ -137,7 +138,7 @@ function backdrop(c: CanvasRenderingContext2D) {
 
 /* ── the plate: measured once the font is in ── */
 const TITLE_FONT = '700 72px Fredoka', SUB_FONT = '500 23px Fredoka', PILL_FONT = '500 15px Fredoka';
-const FACTS = [`${animalAvatarTypes.length} animals`, 'idle · working · sleeping', '2D canvas, no WebGL'];
+const FACTS = [`${animalAvatarTypes.length} animals`, `${animalAvatarStates.length} states`, '2D canvas, no WebGL'];
 let plate = { x: 0, y: 0, w: 0, h: 0 };
 let pillW = 0;
 function measure() {

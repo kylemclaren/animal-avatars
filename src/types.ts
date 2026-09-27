@@ -21,8 +21,17 @@ export type AnimalAvatarType =
  */
 export type AnimalAvatarFace = 'eyes' | 'mouth';
 
-/** What the animal is doing. Each state is a pose plus its own motion. */
-export type AnimalAvatarState = 'default' | 'working' | 'sleeping';
+/**
+ * What the animal is doing. Each state is a pose plus its own motion:
+ * - `default`: idle. Breathes, blinks, glances around, hops now and then.
+ * - `working`: hops, and every third hop spins.
+ * - `sleeping`: eyes shut, head down, slow breaths, the odd nod.
+ * - `thinking`: head tilted, eyes up to one side and then the other, a
+ *   small "hmm" of a mouth, a trail of thought bubbles pulsing above.
+ * - `happy`: bounces and wiggles, eyes squeezed into smiles, a wide open
+ *   grin, sparkles twinkling round the head.
+ */
+export type AnimalAvatarState = 'default' | 'working' | 'sleeping' | 'thinking' | 'happy';
 
 /** How the landing squash of a jump plays out. */
 export type AnimalAvatarSquashEase = 'sharp' | 'pulse' | 'soft' | 'bouncy';
@@ -107,7 +116,7 @@ export interface AnimalAvatarProps
   type?: AnimalAvatarType;
   /** Face kind. Defaults to the type's own. */
   face?: AnimalAvatarFace;
-  /** What the animal is doing: `default` (idle), `working` (hopping, spinning) or `sleeping`. */
+  /** What the animal is doing: `default` (idle), `working`, `sleeping`, `thinking` or `happy`. */
   state?: AnimalAvatarState;
   /** Rendered size in px, or any CSS length. Default `64`. */
   size?: number | string;

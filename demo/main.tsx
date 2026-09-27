@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { AnimalAvatar, animalAvatarTypes, drawAnimalAvatarFrame, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarState, type AnimalAvatarType } from '../src';
+import { AnimalAvatar, animalAvatarTypes, animalAvatarStates, drawAnimalAvatarFrame, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarState, type AnimalAvatarType } from '../src';
 
 const DEG = Math.PI / 180;
 const ANIMALS: AnimalAvatarType[] = animalAvatarTypes;
 const YAWS = [-40, -20, 0, 20, 40];
-const states: AnimalAvatarState[] = ['default', 'working', 'sleeping'];
+const states: AnimalAvatarState[] = animalAvatarStates;
 
 /* one frozen pose per canvas: the head turned by `yaw` */
 function TurnStrip({ type, size = 96, state = 'default' }: { type: AnimalAvatarType; size?: number; state?: AnimalAvatarState }) {
@@ -50,7 +50,7 @@ function App() {
           <div className="cell" key={t}><AnimalAvatar type={t} size={150} seed={i / ANIMALS.length} /><span className="label">{animalAvatarPresets[t].label}</span></div>
         ))}
       </div>
-      <h2>States: idle, working, sleeping</h2>
+      <h2>States: idle, working, thinking, happy, sleeping</h2>
       {ANIMALS.map((t) => (
         <div className="row tight" key={t}>
           {states.map((s) => (

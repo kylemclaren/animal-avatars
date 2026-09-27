@@ -1,13 +1,13 @@
 /* The rig. A pose is a handful of numbers — head yaw / pitch / roll, a
    position, squash, how open the eyes are, where they look — and blend
-   weights for the three states. A Sim advances a pose through time: each
+   weights for the five states. A Sim advances a pose through time: each
    state sets targets and wanders around them, runs its own events (a
    flip, a hop, a nod, a blink), and a state change eases from one set of
    targets to the next on a timed curve, so it starts and ends softly. */
 
 import type { AnimalAvatarState, AnimalAvatarSquashEase } from './types';
 
-export const STATES: AnimalAvatarState[] = ['default', 'working', 'sleeping'];
+export const STATES: AnimalAvatarState[] = ['default', 'working', 'sleeping', 'thinking', 'happy'];
 /* the working state's hop: its period, and the height of the spinning one */
 const HOP_T = 0.68;
 const HOP_SPIN_H = 26;
@@ -140,15 +140,19 @@ export interface Pose {
   lookY: number;
   /** the breathing cycle, −1 … 1 */
   breath: number;
-  /** working only: how far the eyes have closed into a laugh, 0 … 1 */
+  /** working and happy: how far the eyes have closed into a laugh, 0 … 1 */
   laugh: number;
   /** the cartoon whirl round a spinning body: strength 0 … 1, and where
       its head is, in radians round the ring */
   whirl: number;
   whirlAngle: number;
-  /** blend weights: default, working, sleeping — they sum to 1 */
-  w: [number, number, number];
+  /** seconds on the sim's own clock: what the states' flourishes (the
+      thought bubbles, the sparkles) keep time by */
+  time: number;
+  /** blend weights: default, working, sleeping, thinking, happy — they sum to 1 */
+  w: Weights;
 }
+export type Weights = [number, number, number, number, number];
 
 const DEG = Math.PI / 180;
 const TAU = Math.PI * 2;
@@ -157,7 +161,7 @@ const TAU = Math.PI * 2;
 /* How long a switch takes. Settling down takes longer than getting to
    work: coming back to idle the body has to let go of the hops, so it
    eases out over more than a second. */
-const SWITCH_TO: Record<AnimalAvatarState, number> = { default: 1.2, working: 0.7, sleeping: 1.4 };
+const SWITCH_TO: Record<AnimalAvatarState, number> = { default: 1.2, working: 0.7, sleeping: 1.4, thinking: 0.9, happy: 0.5 };
 const SWITCH_FROM_SLEEP = 1;
 
 /* Deterministic per-instance randomness (mulberry32). */
@@ -265,16 +269,28 @@ const REST: Record<AnimalAvatarState, Rest> = {
   default: { pitch: 0, roll: 0, y: 0, lookX: 0, lookY: 0 },
   working: { pitch: 5 * DEG, roll: 0, y: 0, lookX: 0, lookY: 0 },
   sleeping: { pitch: -16 * DEG, roll: 6 * DEG, y: 3, lookX: 0, lookY: 1 },
+  /* the side it ponders toward comes from the ponder itself */
+  thinking: { pitch: 3 * DEG, roll: 0, y: 0, lookX: 0, lookY: -0.6 },
+  happy: { pitch: 4 * DEG, roll: 0, y: 0, lookX: 0, lookY: -0.6 },
 };
+/* thinking: how far the head turns and tilts to a side, and how long it
+   ponders there before it looks the other way */
+const PONDER_YAW = 16 * DEG;
+const PONDER_ROLL = 6 * DEG;
+const PONDER_PITCH = 4 * DEG;
+/* happy: two quick bounces and a wiggle, over and over */
+const JOY_CYCLE = 1.5;
+const JOY_HOP = 0.36;
+const JOY_H = 11;
 
 export class Sim {
-  readonly pose: Pose = { yaw: 0, pitch: 0, roll: 0, x: 0, y: 0, sx: 1, sy: 1, eyeOpen: 1, blinkL: 0, blinkR: 0, lookX: 0, lookY: 0, breath: 0, laugh: 0, whirl: 0, whirlAngle: 0, w: [1, 0, 0] };
+  readonly pose: Pose = { yaw: 0, pitch: 0, roll: 0, x: 0, y: 0, sx: 1, sy: 1, eyeOpen: 1, blinkL: 0, blinkR: 0, lookX: 0, lookY: 0, breath: 0, laugh: 0, whirl: 0, whirlAngle: 0, time: 0, w: [1, 0, 0, 0, 0] };
   state: AnimalAvatarState = 'default';
 
   private rand: () => number;
   private t = 0;
   /* a state change: the weights it started from and its progress */
-  private wFrom: [number, number, number] = [1, 0, 0];
+  private wFrom: Weights = [1, 0, 0, 0, 0];
   private tr = 1;
   private trDuration = 1.2;
   private yawW: Wander;
@@ -328,6 +344,13 @@ export class Sim {
   private ptrTargetS = 0;
   /* the smoothed yaw the head is turning to on its own */
   private baseYaw = 0;
+  /* thinking: which side it ponders toward, and when it looks to the other */
+  private ponderSide = 1;
+  private ponderAt = 0;
+  /* happy: where it is in its bounce-and-wiggle, and the eyes' peeks open */
+  private joyPhase = 0;
+  private peek = new Event(0.7);
+  private peekAt = 0;
 
   constructor(seed: number, state: AnimalAvatarState = 'default') {
     this.rand = rng(Math.floor(seed * 1e6) + 1);
@@ -356,10 +379,10 @@ export class Sim {
     this.state = next;
     const w = this.pose.w;
     if (immediate) {
-      for (let i = 0; i < 3; i++) w[i] = STATES[i] === next ? 1 : 0;
+      for (let i = 0; i < STATES.length; i++) w[i] = STATES[i] === next ? 1 : 0;
       this.tr = 1;
     } else {
-      this.wFrom = [w[0], w[1], w[2]];
+      this.wFrom = [w[0], w[1], w[2], w[3], w[4]];
       this.tr = 0;
       this.trDuration = from === 'sleeping' ? SWITCH_FROM_SLEEP : SWITCH_TO[next];
     }
@@ -395,6 +418,25 @@ export class Sim {
         this.lookXW.set(0, 2, 4, 2);
         this.lookYW.set(0, 2, 4, 2);
         this.nodAt = this.t + 2.5 + this.rand() * 4;
+        break;
+      case 'thinking':
+        /* slow and deliberate: the ponder aims the head and the eyes, and
+           these carry them there on soft springs */
+        this.yawW.set(0, 3, 5, 1.1);
+        this.pitchW.set(0, 3, 5, 1.2);
+        this.rollW.set(0, 3, 5, 1);
+        this.lookXW.set(0, 2, 3, 5);
+        this.lookYW.set(0, 2, 3, 5);
+        this.ponderAt = 0;
+        break;
+      case 'happy':
+        this.yawW.set(9 * DEG, 0.8, 1.6, 3);
+        this.pitchW.set(3 * DEG, 1, 2, 3);
+        this.rollW.set(0, 1, 2, 3);
+        this.lookXW.set(1.5, 0.6, 1.4, 12);
+        this.lookYW.set(1, 0.6, 1.4, 12);
+        this.joyPhase = 0;
+        this.peekAt = this.t + 1.8 + this.rand() * 1.5;
         break;
     }
   }
@@ -477,16 +519,16 @@ export class Sim {
       this.tr = Math.min(1, this.tr + dt / this.trDuration);
       /* a sine ease: no kick at either end of a switch */
       const e = easeSine(this.tr);
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < STATES.length; i++) {
         const target = STATES[i] === this.state ? 1 : 0;
         w[i] = this.wFrom[i] + (target - this.wFrom[i]) * e;
       }
     }
-    const [wd, ww, ws] = w;
+    const [wd, ww, ws, wt, wh] = w;
 
     /* rest targets, blended */
     const rest = { pitch: 0, roll: 0, y: 0, lookX: 0, lookY: 0 };
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < STATES.length; i++) {
       const r = REST[STATES[i]];
       rest.pitch += r.pitch * w[i];
       rest.roll += r.roll * w[i];
@@ -506,6 +548,18 @@ export class Sim {
       /* the tilt goes with the turn, so it follows it */
       this.rollW.aim(gx * GAZE_ROLL * reach * this.turnK);
       this.gazeAt = t + GAZE_HOLD_MIN + this.rand() * (GAZE_HOLD_MAX - GAZE_HOLD_MIN);
+    }
+
+    /* thinking: the head turns and tilts to one side, the eyes go up to
+       that side, and after a while it all swings over to the other */
+    if (this.state === 'thinking' && t >= this.ponderAt) {
+      const s = (this.ponderSide = -this.ponderSide);
+      this.yawW.aim(s * PONDER_YAW * this.turnK);
+      this.pitchW.aim(PONDER_PITCH);
+      this.rollW.aim(s * PONDER_ROLL);
+      this.lookXW.aim(s * 3);
+      this.lookYW.aim(-2.2);
+      this.ponderAt = t + 3.2 + this.rand() * 2.8;
     }
 
     /* wander */
@@ -547,8 +601,8 @@ export class Sim {
        it shows */
     const ringAngle = (q: number) => TAU * (1.5 * q + 0.9 * easeInOut(q));
 
-    /* blinks: idle and working blink; a double blink now and then */
-    if (t >= this.blinkAt && !this.blink.active && wd + ww > 0.5) {
+    /* blinks: idle, working and thinking blink; a double blink now and then */
+    if (t >= this.blinkAt && !this.blink.active && wd + ww + wt > 0.5) {
       this.blink.fire();
       this.blinkAgain = !this.blinkAgain && this.rand() < 0.22;
       this.blinkAt = t + (this.blinkAgain ? 0.28 : 2.2 + this.rand() * 2.6);
@@ -558,7 +612,7 @@ export class Sim {
 
     /* eye darts: a quick glance to the side and back, between the slower
        looks — the eyes have a life of their own */
-    if (t >= this.dartAt && !this.dart.active && wd + ww > 0.5) {
+    if (t >= this.dartAt && !this.dart.active && wd + ww + wt > 0.5) {
       this.dart.fire();
       this.dartX = (this.rand() * 2 - 1) * 4;
       this.dartY = (this.rand() * 2 - 1) * 2;
@@ -570,8 +624,9 @@ export class Sim {
       const q = this.dart.p;
       /* snap out, hold, snap back */
       const hold = q < 0.15 ? q / 0.15 : q > 0.8 ? (1 - q) / 0.2 : 1;
-      lookXAdd += this.dartX * hold * (wd + ww);
-      lookYAdd += this.dartY * hold * (wd + ww);
+      /* thinking, the darts are smaller: the eyes stay on their thought */
+      lookXAdd += this.dartX * hold * (wd + ww + 0.4 * wt);
+      lookYAdd += this.dartY * hold * (wd + ww + 0.4 * wt);
     }
 
     /* idle: a full turn now and then, with a jump */
@@ -691,6 +746,35 @@ export class Sim {
       laugh = Math.max(laugh, q < 0.18 ? q / 0.18 : q > 0.78 ? (1 - q) / 0.22 : 1);
     }
 
+    /* happy: two quick bounces, squashing and stretching, then a wiggle
+       that dies away; the eyes are shut in smiles but for the odd peek */
+    if (wh > 0.01) {
+      this.joyPhase += dt;
+      const c = this.joyPhase % JOY_CYCLE;
+      if (c < 2 * JOY_HOP) {
+        const k = Math.floor(c / JOY_HOP), q = c / JOY_HOP - k;
+        const arc = Math.sin(Math.PI * q);
+        const land = hopSquash(q);
+        hopY -= JOY_H * arc * wh;
+        sx += (0.14 * land - 0.05 * arc) * wh;
+        sy += (-0.16 * land + 0.08 * arc) * wh;
+        rollAdd += (k === 0 ? 1 : -1) * 5 * DEG * arc * wh;
+      } else {
+        const u = (c - 2 * JOY_HOP) / (JOY_CYCLE - 2 * JOY_HOP);
+        rollAdd += 7 * DEG * Math.sin(u * Math.PI * 4) * (1 - u) * (1 - u) * wh;
+      }
+    }
+    if (this.state === 'happy' && t >= this.peekAt && !this.peek.active) {
+      this.peek.fire();
+      this.peekAt = t + 2.4 + this.rand() * 2;
+    }
+    this.peek.update(dt);
+    if (wh > 0.01) {
+      const q = this.peek.active ? this.peek.p : -1;
+      const open = q < 0 ? 0 : q < 0.2 ? q / 0.2 : q > 0.8 ? (1 - q) / 0.2 : 1;
+      laugh = Math.max(laugh, (1 - open) * wh);
+    }
+
     /* sleeping: the head drops, then jerks back up */
     if (this.state === 'sleeping' && t >= this.nodAt && !this.nod.active) {
       this.nod.fire();
@@ -751,6 +835,7 @@ export class Sim {
     p.lookY = baseLookY + lookYAdd;
     p.whirl = whirl;
     p.whirlAngle = whirlAngle;
+    p.time = t;
   }
 }
 
@@ -771,9 +856,11 @@ export function restPose(state: AnimalAvatarState): Pose {
     lookX: r.lookX,
     lookY: r.lookY,
     breath: 0,
-    laugh: 0,
+    /* happy's still pose is a beaming one */
+    laugh: state === 'happy' ? 1 : 0,
     whirl: 0,
     whirlAngle: 0,
-    w: STATES.map((s) => (s === state ? 1 : 0)) as [number, number, number],
+    time: 0,
+    w: STATES.map((s) => (s === state ? 1 : 0)) as Weights,
   };
 }

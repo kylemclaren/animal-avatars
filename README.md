@@ -16,7 +16,9 @@ npm install animal-avatars
 import { AnimalAvatar } from 'animal-avatars';
 
 <AnimalAvatar type="panda" size={64} />
+<AnimalAvatar type="owl" state="thinking" />
 <AnimalAvatar type="chameleon" state="working" />
+<AnimalAvatar type="whale" state="happy" />
 <AnimalAvatar type="bunny" state="sleeping" face="eyes" />
 ```
 
@@ -42,7 +44,9 @@ Each head's front is a gentle dome. The eyes, the mouth and the markings (stripe
 ## States
 
 - `default`: idle. Breathes, blinks, glances around and hops now and then.
-- `working`: hops and spins, with its mouth open.
+- `working`: hops, and every third hop spins, with its mouth open.
+- `thinking`: tilts its head and ponders from side to side, eyes up, with a small "hmm" of a mouth and a trail of thought bubbles pulsing above.
+- `happy`: bounces and wiggles with its eyes squeezed into smiles and a wide grin, sparkles twinkling round its head.
 - `sleeping`: eyes shut, head down, slow breaths.
 
 A state change morphs the face rather than swapping it.
@@ -52,7 +56,7 @@ A state change morphs the face rather than swapping it.
 | Prop | Default | |
 | --- | --- | --- |
 | `type` | `'tiger'` | Which animal. |
-| `state` | `'default'` | `default`, `working` or `sleeping`. |
+| `state` | `'default'` | `default`, `working`, `thinking`, `happy` or `sleeping`. |
 | `face` | the animal's own | `eyes`, or `mouth` for the eyes and the mouth. |
 | `size` | `64` | Size in px, or any CSS length. |
 | `color` | the animal's own | The head colour. `color="#F4F2FA"` on the tiger gives a white tiger. |
