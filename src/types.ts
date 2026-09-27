@@ -1,7 +1,19 @@
 import type { CanvasHTMLAttributes, CSSProperties } from 'react';
 
 /** The animals. */
-export type AnimalAvatarType = 'tiger' | 'elephant' | 'panda' | 'bunny' | 'chameleon';
+export type AnimalAvatarType =
+  | 'tiger'
+  | 'elephant'
+  | 'panda'
+  | 'bunny'
+  | 'chameleon'
+  | 'penguin'
+  | 'pig'
+  | 'lion'
+  | 'octopus'
+  | 'owl'
+  | 'sheep'
+  | 'whale';
 
 /**
  * What the face is made of: the eyes alone, or the eyes and the animal's
@@ -24,14 +36,25 @@ export type AnimalAvatarSquashEase = 'sharp' | 'pulse' | 'soft' | 'bouncy';
  */
 export type AnimalAvatarShading = 'crisp' | 'smooth' | 'plastic' | 'flat';
 
-/** An animal's mouth: `animal` the "ω" under a nose, `smile` a long
-    smile (a chameleon's), `none` for a face with no mouth to show (an
-    elephant's, behind its trunk). `y` is where it hangs, in the 100×100 box. */
+/**
+ * An animal's mouth, hung from `y` in the 100×100 box:
+ * - `animal`: the "ω" under a nose; `teeth` adds two buck teeth (a bunny's).
+ * - `smile`: a long smile, `width` its half width in face units.
+ * - `beak`: a two-tone beak, `width` its half width and `height` its
+ *   length. A beak is a feature, not an expression, so it is drawn with
+ *   either face; it opens while working.
+ * - `none`: no mouth to show (an elephant's is behind its trunk).
+ */
 export interface AnimalAvatarMouth {
-  style: 'animal' | 'smile' | 'none';
+  style: 'animal' | 'smile' | 'beak' | 'none';
   y: number;
-  /** half width of a `smile`, face units */
   width?: number;
+  height?: number;
+  teeth?: boolean;
+  /** a beak's upper and lower colours */
+  color?: string;
+  shade?: string;
+  /** an open mouth's inside and tongue */
   inside?: string;
   tongue?: string;
 }

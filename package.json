@@ -1,7 +1,7 @@
 {
   "name": "animal-avatars",
   "version": "0.1.0",
-  "description": "Animated animal avatars for React: a tiger, an elephant, a panda, a bunny and a chameleon, glossy 3D heads with living faces that turn, hop and sleep. 2D canvas, no WebGL.",
+  "description": "Animated animal avatars for React: twelve glossy 3D animals, from a tiger to a whale, with living faces that turn, hop and sleep. 2D canvas, no WebGL.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.es.js",
@@ -28,7 +28,8 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "shapes": "node scripts/gen-shapes.mjs",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "hero": "node scripts/hero-gif.mjs"
   },
   "peerDependencies": {
     "react": ">=18.0.0"
@@ -49,6 +50,9 @@
     "animal",
     "tiger",
     "panda",
+    "penguin",
+    "whale",
+    "owl",
     "animation",
     "canvas",
     "face",

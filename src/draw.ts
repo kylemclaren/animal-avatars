@@ -435,6 +435,7 @@ export function draw(ctx: CanvasRenderingContext2D, box: number, pose: Pose, cfg
     };
     if (cfg.markings) {
       const q = [0, 0];
+      const print = new Path2D();
       ctx.globalAlpha = plasticDone ? 0.96 : 1;
       for (const m of cfg.markings) {
         const path = new Path2D();
@@ -448,8 +449,31 @@ export function draw(ctx: CanvasRenderingContext2D, box: number, pose: Pose, cfg
         }
         ctx.fillStyle = m.color;
         ctx.fill(path);
+        print.addPath(path);
       }
       ctx.globalAlpha = 1;
+      /* the print sits under the same light as the head: a soft sheen on
+         the lit side, a little shade toward the far edge, so a muzzle or
+         a patch reads as part of the form rather than a sticker on it.
+         Every outline is wound the same way, so their union is one clip. */
+      if (mode !== 'flat') {
+        const c = [0, 0];
+        front(dome ? dome.cx : 50, dome ? dome.cy : 50, c);
+        const R = (dome ? Math.max(dome.rx, dome.ry) : 40) * sf;
+        const g = ctx.createRadialGradient(
+          c[0] + lx * R * 0.5, c[1] + ly * R * 0.5 - R * 0.25, R * 0.05,
+          c[0] + lx * R * 0.15, c[1] + ly * R * 0.15 - R * 0.1, R * 1.2
+        );
+        g.addColorStop(0, `rgba(255,255,255,${Math.min(0.5, 0.2 * highlight)})`);
+        g.addColorStop(0.4, 'rgba(255,255,255,0)');
+        g.addColorStop(0.72, 'rgba(0,0,0,0)');
+        g.addColorStop(1, `rgba(0,0,0,${Math.min(0.5, 0.45 * shadow)})`);
+        ctx.save();
+        ctx.clip(print);
+        ctx.fillStyle = g;
+        ctx.fillRect(-150, -150, 300, 300);
+        ctx.restore();
+      }
     }
     ctx.translate(cfg.faceX - 50, cfg.faceY - 50);
     ctx.scale(cfg.faceScale, cfg.faceScale);
@@ -471,7 +495,9 @@ export function draw(ctx: CanvasRenderingContext2D, box: number, pose: Pose, cfg
         return { x: (p[0] - (fx - 50)) / fs, y: (p[1] - (fy - 50)) / fs, sx, sy: syy, z: Math.min(sx, syy) };
       };
     }
-    drawFace(ctx, pose, cfg, place);
+    /* the face's lines keep to a floor of about a device-independent
+       pixel, so a sleeping lid or a mouth still reads at 32px */
+    drawFace(ctx, pose, cfg, place, 1.1 / ((box / 100) * cfg.faceScale));
     ctx.restore();
   }
   /* the near half of the whirl passes in front of the face */
@@ -524,7 +550,7 @@ function eyePath(x0: number, y0: number, cy: number): Path2D {
 
 type Place = (x: number, y: number) => { x: number; y: number; sx: number; sy: number; z: number };
 
-function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, place?: Place) {
+function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, place: Place | undefined, minLine: number) {
   const [wd, ww, ws] = pose.w;
   const ink = cfg.ink;
   const es = cfg.eyes ?? {};
@@ -573,7 +599,7 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
     const x0 = kOpen * 0.01 + kShut * 5.4 + kLaugh * 6.2 + kSleep * 6;
     const y0 = kOpen * 1.1 * tall * eTall + kShut * 0.6 + kLaugh * (2.2 - lift * 1.5) + kSleep * (-1.4 + sag);
     const cy = kOpen * -3.3 * tall * eTall + kShut * 0.6 + kLaugh * (-11.4 - 4 * lift) + kSleep * (5.4 + 2 * sag);
-    const w = kOpen * EYE_RX * 2 * wide * eSize + kShut * 2.8 + kLaugh * 4.4 + kSleep * 4;
+    const w = Math.max(minLine, kOpen * EYE_RX * 2 * wide * eSize + kShut * 2.8 + kLaugh * 4.4 + kSleep * 4);
     /* the eyes drift toward the look when open, less so when shut */
     const dx = lx * (kOpen + 0.5 * (kShut + kLaugh)), dy = ly * (kOpen + 0.5 * kShut);
     at(side * half + dx, ey + dy, () => {
@@ -599,16 +625,17 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
     });
   }
 
-  if (cfg.face === 'mouth' && cfg.mouth) {
+  const mo = cfg.mouth;
+  if (mo && (cfg.face === 'mouth' || mo.style === 'beak')) {
     /* The animal mouths. Every number is a blend of the three states', so
        a switch morphs rather than swaps; working, a little open mouth
-       drops under the line, deeper at the top of a hop. */
-    const mo = cfg.mouth;
+       drops under the line, deeper at the top of a hop. A beak is a
+       feature rather than an expression, so it shows with either face. */
     const b = (d: number, w: number, s: number) => wd * d + ww * w + ws * s;
     const kd = 1 + 0.08 * pose.breath;
     const hop = Math.max(0, -pose.y) / 26;
     const open = ww * (5.6 + 4 * hop);
-    const lw = b(1.55, 1.6, 1.35);
+    const lw = Math.max(minLine, b(1.55, 1.6, 1.35));
     const ay = (mo.y - cfg.faceY) / cfg.faceScale;
     const pocketFill = (pocket: Path2D, ty: number, tw: number) => {
       ctx.fillStyle = mo.inside ?? '#5B1F2B';
@@ -660,6 +687,26 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
           pocket.bezierCurveTo(w2, y0 + open * 1.25, -w2, y0 + open * 1.25, -w2, y0);
           pocketFill(pocket, y0 + open * 0.95, w2 * 0.72);
         }
+        if (mo.teeth) {
+          /* two buck teeth from under the nose, the curves drawn over
+             their sides */
+          const tw = 1.9, tt = ph + 0.1, tb = ph + 3.3, r = 0.8;
+          const teeth = new Path2D();
+          for (const [x0, x1] of [[-tw, -0.08], [0.08, tw]]) {
+            teeth.moveTo(x0, tt);
+            teeth.lineTo(x1, tt);
+            teeth.lineTo(x1, tb - r);
+            teeth.quadraticCurveTo(x1, tb, x1 - r, tb);
+            teeth.lineTo(x0 + r, tb);
+            teeth.quadraticCurveTo(x0, tb, x0, tb - r);
+            teeth.closePath();
+          }
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fill(teeth);
+          ctx.strokeStyle = ink;
+          ctx.lineWidth = lw * 0.5;
+          ctx.stroke(teeth);
+        }
         ctx.strokeStyle = ink;
         ctx.lineWidth = lw;
         ctx.lineCap = 'round';
@@ -671,6 +718,40 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
         ctx.quadraticCurveTo(-hw * 0.5, ph + dip * 2, 0, ph);
         ctx.quadraticCurveTo(hw * 0.5, ph + dip * 2, hw, ph - 0.5);
         ctx.stroke();
+      });
+    } else if (mo.style === 'beak') {
+      /* A two-tone beak: the lower half tucked under the upper, its tip
+         peeking out below; working, it drops open on the dark inside. */
+      const bw = mo.width ?? 4.5, bh = mo.height ?? 5.5;
+      const gape = ww * (2.4 + 2.6 * hop);
+      at(lx * 0.2, ay, () => {
+        if (gape > 0.2) {
+          ctx.fillStyle = mo.inside ?? '#5B1F2B';
+          ctx.beginPath();
+          ctx.moveTo(-bw * 0.62, bh * 0.4);
+          ctx.lineTo(bw * 0.62, bh * 0.4);
+          ctx.lineTo(0, bh * 0.98 + gape);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.fillStyle = mo.shade ?? '#E07A1E';
+        ctx.beginPath();
+        ctx.moveTo(-bw * 0.7, bh * 0.3 + gape * 0.4);
+        ctx.lineTo(bw * 0.7, bh * 0.3 + gape * 0.4);
+        ctx.quadraticCurveTo(bw * 0.4, bh * 0.85 + gape, 0, bh * 1.18 + gape);
+        ctx.quadraticCurveTo(-bw * 0.4, bh * 0.85 + gape, -bw * 0.7, bh * 0.3 + gape * 0.4);
+        ctx.fill();
+        ctx.fillStyle = mo.color ?? '#FFA63D';
+        ctx.beginPath();
+        ctx.moveTo(-bw, 0);
+        ctx.quadraticCurveTo(0, -bh * 0.28, bw, 0);
+        ctx.quadraticCurveTo(bw * 0.55, bh * 0.62, 0, bh);
+        ctx.quadraticCurveTo(-bw * 0.55, bh * 0.62, -bw, 0);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.beginPath();
+        ctx.ellipse(-bw * 0.3, bh * 0.2, bw * 0.3, bh * 0.1, -0.2, 0, Math.PI * 2);
+        ctx.fill();
       });
     }
   }

@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { AnimalAvatar, drawAnimalAvatarFrame, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarState, type AnimalAvatarType } from '../src';
+import { AnimalAvatar, animalAvatarTypes, drawAnimalAvatarFrame, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarState, type AnimalAvatarType } from '../src';
 
 const DEG = Math.PI / 180;
-const ANIMALS: AnimalAvatarType[] = ['tiger', 'elephant', 'panda', 'bunny', 'chameleon'];
+const ANIMALS: AnimalAvatarType[] = animalAvatarTypes;
 const YAWS = [-40, -20, 0, 20, 40];
 const states: AnimalAvatarState[] = ['default', 'working', 'sleeping'];
 
@@ -44,10 +44,10 @@ function TurnStrip({ type, size = 96, state = 'default' }: { type: AnimalAvatarT
 function App() {
   return (
     <>
-      <h1>Animals: tiger, elephant, panda, bunny, chameleon. Hover to make them look, click to make them hop.</h1>
+      <h1>Animals. Hover to make them look, click to make them hop.</h1>
       <div className="row">
         {ANIMALS.map((t, i) => (
-          <div className="cell" key={t}><AnimalAvatar type={t} size={170} seed={i / 5} /><span className="label">{animalAvatarPresets[t].label}</span></div>
+          <div className="cell" key={t}><AnimalAvatar type={t} size={150} seed={i / ANIMALS.length} /><span className="label">{animalAvatarPresets[t].label}</span></div>
         ))}
       </div>
       <h2>States: idle, working, sleeping</h2>

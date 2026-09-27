@@ -1,12 +1,12 @@
 # animal-avatars
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/hero-light.png">
-  <img alt="animal-avatars: a tiger, an elephant, a panda, a bunny and a chameleon" src="docs/hero-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.gif">
+  <source media="(prefers-color-scheme: light)" srcset="docs/hero-light.gif">
+  <img alt="animal-avatars: twelve animated animals, from a tiger to a whale" src="docs/hero-light.gif">
 </picture>
 
-Animated animal avatars for React. Five glossy 3D heads (a tiger, an elephant, a panda, a bunny and a chameleon) with living faces that blink, look toward the pointer, turn, hop and fall asleep. Drawn on a 2D canvas, no WebGL.
+Animated animal avatars for React. Twelve glossy 3D animals, from a tiger to a whale, with living faces that blink, look toward the pointer, turn, hop and fall asleep. Drawn on a 2D canvas, no WebGL.
 
 ```bash
 npm install animal-avatars
@@ -22,15 +22,22 @@ import { AnimalAvatar } from 'animal-avatars';
 
 ## The animals
 
-| `type`      | Colour    | Mouth                         |
-| ----------- | --------- | ----------------------------- |
-| `tiger`     | orange    | "ω" under a pink nose         |
-| `elephant`  | blue-grey | none (the trunk sits there)   |
-| `panda`     | white     | "ω" under a black nose        |
-| `bunny`     | lilac     | "ω" under a pink nose         |
-| `chameleon` | green     | a long smile                  |
+| `type`      | Colour    | Look                                        | Mouth                       |
+| ----------- | --------- | ------------------------------------------- | --------------------------- |
+| `tiger`     | orange    | stripes, a cream muzzle, whisker dots       | "ω" under a pink nose       |
+| `elephant`  | blue-grey | big pink-lined ears, a curling trunk        | none (the trunk sits there) |
+| `panda`     | white     | black ears and eye patches                  | "ω" under a black nose      |
+| `bunny`     | lilac     | tall ears, a pale muzzle                    | "ω" with buck teeth         |
+| `chameleon` | green     | a casque, turret eyes, a curled tail        | a long smile                |
+| `penguin`   | navy      | a heart-shaped white face, a crest curl     | an orange beak              |
+| `pig`       | pink      | a snout with nostrils, pointed ears         | a small smile               |
+| `lion`      | gold      | a big scalloped mane, a cream muzzle        | "ω" under a brown nose      |
+| `octopus`   | coral     | spots, five curly tentacles                 | a small smile               |
+| `owl`       | caramel   | feather tufts, rimmed facial discs          | a golden beak               |
+| `sheep`     | cream     | a fluffy fleece, a peach face, tan ears     | "ω" under a pink nose       |
+| `whale`     | sky blue  | a curling tail, a water spout, a pale belly | a long smile                |
 
-Each head's front is a gentle dome. The eyes, the mouth and the markings (stripes, muzzles, patches, spots) all sit on it, so they turn together with the head.
+Each head's front is a gentle dome. The eyes, the mouth and the markings (stripes, muzzles, patches, spots) all sit on it, so they turn together with the head. A beak is a feature rather than an expression, so it shows with either `face`, and it opens while working.
 
 ## States
 
@@ -70,7 +77,9 @@ npm run build
 npm run shapes     # regenerate src/shapes.ts from scripts/gen-shapes.mjs
 ```
 
-The hero images come from `demo/hero.html`: open `localhost:5182/hero.html` (dark) and `localhost:5182/hero.html?theme=light` (light) in a 1280×640 viewport at 2×, and save the screenshots as `docs/hero-dark.png` and `docs/hero-light.png`.
+The animated hero comes from `demo/hero-gif.html`, which draws every frame on a canvas. To re-record it, run `npm run dev` and `npm run hero` (a small server that collects the frames), then open `http://localhost:5182/hero-gif.html?theme=dark&sink=http://localhost:5199` and the same with `theme=light`. Each writes `docs/hero-<theme>.gif` with ffmpeg and gifsicle. Without `sink`, the page just plays the scene live.
+
+`/review.html` shows every animal close up, at a few angles and in each state (`?a=owl,lion&size=220&light` narrows it down), which is handy when tuning shapes.
 
 To add an animal:
 
