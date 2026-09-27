@@ -506,25 +506,61 @@ export function draw(ctx: CanvasRenderingContext2D, box: number, pose: Pose, cfg
       const m = [0, 0];
       front(cfg.faceX, cfg.mouth.y + 1.5, m);
       const side = Math.sign(pose.tongue), reach = Math.abs(pose.tongue);
-      const L = 54 * reach, a = 0.2;
-      const tx = m[0] + side * Math.cos(a) * L, ty = m[1] + Math.sin(a) * L;
+      const L = 56 * reach;
+      /* the line it flies along: nearly level, bowing up, with a wobble
+         while it travels that settles at full reach */
+      const tx = m[0] + side * L, ty = m[1] + L * 0.1;
+      const cx = m[0] + side * L * 0.5, cy = m[1] - L * (0.16 + 0.1 * Math.sin(Math.PI * reach) * (1 - reach));
+      const at = (t: number) => {
+        const u = 1 - t;
+        return [u * u * m[0] + 2 * u * t * cx + t * t * tx, u * u * m[1] + 2 * u * t * cy + t * t * ty];
+      };
+      /* a tapered body, thick at the mouth */
+      const N = 16, L1: number[][] = [], R1: number[][] = [];
+      for (let i = 0; i <= N; i++) {
+        const t = (i / N) * 0.94, [x, y] = at(t), [x2, y2] = at(Math.min(1, t + 0.02));
+        const d = Math.hypot(x2 - x, y2 - y) || 1, nx = -(y2 - y) / d, ny = (x2 - x) / d;
+        const hw = (7.4 - 3.4 * t) / 2;
+        L1.push([x + nx * hw, y + ny * hw]);
+        R1.push([x - nx * hw, y - ny * hw]);
+      }
       const [ca, cb, cc, cd, ce, cf] = body;
       ctx.save();
       ctx.setTransform(ca, cb, cc, cd, ce, cf);
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = '#F07A93';
-      ctx.lineWidth = 4.6;
+      ctx.fillStyle = '#F2758F';
       ctx.beginPath();
-      ctx.moveTo(m[0], m[1]);
-      ctx.quadraticCurveTo(m[0] + side * L * 0.5, m[1] - L * 0.04, tx, ty);
-      ctx.stroke();
-      ctx.fillStyle = '#E2557A';
-      ctx.beginPath();
-      ctx.arc(tx, ty, 5.6, 0, Math.PI * 2);
+      L1.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      for (let i = R1.length - 1; i >= 0; i--) ctx.lineTo(R1[i][0], R1[i][1]);
+      ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      /* its root, rounded, down in the open mouth */
       ctx.beginPath();
-      ctx.arc(tx - 1.8, ty - 1.9, 1.7, 0, Math.PI * 2);
+      ctx.arc(m[0], m[1], 3.7, 0, Math.PI * 2);
+      ctx.fill();
+      /* a pale stripe down its middle, the light catching it */
+      ctx.strokeStyle = 'rgba(255,205,215,0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i = 1; i <= 12; i++) {
+        const [x, y] = at((i / 12) * 0.82);
+        if (i === 1) ctx.moveTo(x, y - 0.8);
+        else ctx.lineTo(x, y - 0.8);
+      }
+      ctx.stroke();
+      /* the sticky tip: a glossy ball */
+      const r = 7;
+      const g = ctx.createRadialGradient(tx - side * 1.8, ty - 2, 0.5, tx, ty, r);
+      g.addColorStop(0, '#FF9FB4');
+      g.addColorStop(0.6, '#EC5B7E');
+      g.addColorStop(1, '#C93F65');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(tx, ty, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.beginPath();
+      ctx.ellipse(tx - side * 2, ty - 2.4, 1.9, 1.3, -0.5 * side, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
