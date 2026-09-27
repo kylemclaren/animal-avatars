@@ -1,5 +1,7 @@
 # animal-avatars
 
+![animal-avatars: a tiger, an elephant, a panda, a bunny and a chameleon](docs/hero.png)
+
 Animated animal avatars for React. Five glossy 3D heads (a tiger, an elephant, a panda, a bunny and a chameleon) with living faces that blink, look toward the pointer, turn, hop and fall asleep. Drawn on a 2D canvas, no WebGL.
 
 ```bash
@@ -63,6 +65,8 @@ npm run typecheck
 npm run build
 npm run shapes     # regenerate src/shapes.ts from scripts/gen-shapes.mjs
 ```
+
+The hero image comes from `demo/hero.html`: open it at `localhost:5182/hero.html` in a 1280×640 viewport at 2× and take a screenshot.
 
 To add an animal:
 
