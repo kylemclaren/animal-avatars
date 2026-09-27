@@ -55,5 +55,14 @@
     "mascot",
     "character"
   ],
-  "license": "MIT"
+  "author": "Kyle McLaren",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kylemclaren/animal-avatars.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kylemclaren/animal-avatars/issues"
+  },
+  "homepage": "https://github.com/kylemclaren/animal-avatars#readme"
 }
