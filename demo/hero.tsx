@@ -1,5 +1,6 @@
 /* The README's hero: every animal frozen in a chosen pose on one stage.
-   Open /hero.html and screenshot #hero at 1280×640, 2×. */
+   Open /hero.html (dark) or /hero.html?theme=light and screenshot #hero
+   at 1280×640, 2×. */
 import { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { drawAnimalAvatarFrame, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarPose, type AnimalAvatarState, type AnimalAvatarType } from '../src';
@@ -44,9 +45,11 @@ function Character({ type, size, state = 'default', pose }: Cast) {
   );
 }
 
+const theme = new URLSearchParams(location.search).get('theme') === 'light' ? 'light' : 'dark';
+
 function Hero() {
   return (
-    <div id="hero">
+    <div id="hero" data-theme={theme}>
       <div className="title">
         <h1><span>animal-avatars</span></h1>
         <p>Cute, glossy, living animal avatars for React</p>

@@ -1,6 +1,10 @@
 # animal-avatars
 
-![animal-avatars: a tiger, an elephant, a panda, a bunny and a chameleon](docs/hero.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/hero-light.png">
+  <img alt="animal-avatars: a tiger, an elephant, a panda, a bunny and a chameleon" src="docs/hero-light.png">
+</picture>
 
 Animated animal avatars for React. Five glossy 3D heads (a tiger, an elephant, a panda, a bunny and a chameleon) with living faces that blink, look toward the pointer, turn, hop and fall asleep. Drawn on a 2D canvas, no WebGL.
 
@@ -66,7 +70,7 @@ npm run build
 npm run shapes     # regenerate src/shapes.ts from scripts/gen-shapes.mjs
 ```
 
-The hero image comes from `demo/hero.html`: open it at `localhost:5182/hero.html` in a 1280×640 viewport at 2× and take a screenshot.
+The hero images come from `demo/hero.html`: open `localhost:5182/hero.html` (dark) and `localhost:5182/hero.html?theme=light` (light) in a 1280×640 viewport at 2×, and save the screenshots as `docs/hero-dark.png` and `docs/hero-light.png`.
 
 To add an animal:
 

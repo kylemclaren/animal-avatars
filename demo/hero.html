@@ -44,6 +44,34 @@
     .floor { position: absolute; left: 50%; bottom: 22px; width: 62%; height: 18px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.55), rgba(0,0,0,0)); }
     canvas { position: relative; display: block; }
     .name { position: relative; margin-top: -30px; font-size: 17px; font-weight: 600; color: #9D93C2; letter-spacing: .4px; }
+    /* light: a pale lilac morning, the same stage */
+    #hero[data-theme="light"] {
+      color: #2A2145;
+      background:
+        radial-gradient(120% 90% at 50% 118%, #D9CCFF 0%, rgba(217,204,255,0) 62%),
+        radial-gradient(70% 60% at 50% -10%, #FFFFFF 0%, rgba(255,255,255,0) 70%),
+        linear-gradient(180deg, #FBF9FF 0%, #F1ECFD 100%);
+    }
+    #hero[data-theme="light"]::before {
+      opacity: .7;
+      background-image:
+        radial-gradient(3px 3px at 8% 18%, #FFC59A 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 17% 42%, #C9B8FF 50%, transparent 51%),
+        radial-gradient(3px 3px at 27% 9%, #FFB3C7 50%, transparent 51%),
+        radial-gradient(2px 2px at 38% 30%, #A8E6B0 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 61% 12%, #FFC59A 50%, transparent 51%),
+        radial-gradient(3px 3px at 72% 36%, #C9B8FF 50%, transparent 51%),
+        radial-gradient(2px 2px at 83% 8%, #A8E6B0 50%, transparent 51%),
+        radial-gradient(3px 3px at 93% 27%, #FFB3C7 50%, transparent 51%),
+        radial-gradient(2px 2px at 4% 58%, #C9B8FF 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 97% 55%, #FFC59A 50%, transparent 51%);
+    }
+    #hero[data-theme="light"] .title h1 span { background-image: linear-gradient(90deg, #FF7A2E, #EE4F86 35%, #8363FF 65%, #2FB553); }
+    #hero[data-theme="light"] .title p { color: #5E5387; }
+    #hero[data-theme="light"] .facts { background: rgba(90,70,160,.06); border-color: rgba(90,70,160,.14); color: #6D6199; }
+    #hero[data-theme="light"] .facts i { background: #B4A9D6; }
+    #hero[data-theme="light"] .glow { opacity: .3; }
+    #hero[data-theme="light"] .floor { background: radial-gradient(closest-side, rgba(70,50,130,.28), rgba(70,50,130,0)); }
   </style>
 </head>
 <body>
