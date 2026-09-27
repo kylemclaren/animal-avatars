@@ -1,6 +1,6 @@
 # The demo site: static files behind nginx. Deploy from site/ with
 #   (cd .. && npm run build) && bun run build && fly deploy
-app = "animal-avatars"
+app = "cute-avatars"
 primary_region = "iad"
 
 [build]

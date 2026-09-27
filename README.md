@@ -8,7 +8,7 @@
 
 Animated animal avatars for React. Sixteen glossy 3D animals, from a tiger to a whale, with living faces that blink, look toward the pointer, turn, hop and fall asleep. Drawn on a 2D canvas, no WebGL.
 
-**[Try them live →](https://animal-avatars.fly.dev)** Play with every prop, see them in a chat and a team list, and read the API.
+**[Try them live →](https://cute-avatars.fly.dev)** Play with every prop, see them in a chat and a team list, and read the API.
 
 ```bash
 npm install cute-avatars
@@ -87,7 +87,7 @@ npm run build
 npm run shapes     # regenerate src/shapes.ts from scripts/gen-shapes.mjs
 ```
 
-The demo site lives in `site/` and is deployed to [animal-avatars.fly.dev](https://animal-avatars.fly.dev) on Fly.io. It serves the built files with nginx:
+The demo site lives in `site/` and is deployed to [cute-avatars.fly.dev](https://cute-avatars.fly.dev) on Fly.io. It serves the built files with nginx:
 
 ```bash
 npm run build                  # the library first: the site takes its types from dist/
