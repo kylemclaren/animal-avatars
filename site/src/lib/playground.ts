@@ -3,7 +3,7 @@ import {
   animalAvatarPresets,
   type AnimalAvatarProps,
   type AnimalAvatarType,
-} from "animal-avatars"
+} from "cute-avatars"
 
 import { cast, pick, states } from "@/lib/cast"
 import { libraryUnions, propDefaults, propDocs } from "@/lib/props-doc"

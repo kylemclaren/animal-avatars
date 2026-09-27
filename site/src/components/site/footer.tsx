@@ -17,7 +17,7 @@ export function Footer() {
           ))}
         </div>
         <p className="font-heading text-3xl font-bold tracking-[-0.02em]">
-          <span className="text-rainbow">animal-avatars</span>
+          <span className="text-rainbow">cute-avatars</span>
         </p>
         <p className="max-w-xl text-sm text-balance text-muted-foreground">
           MIT licence · Rendering engine from{" "}

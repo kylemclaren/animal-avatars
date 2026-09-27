@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react"
-import type { AnimalAvatarState } from "animal-avatars"
+import type { AnimalAvatarState } from "cute-avatars"
 
 import { Avatar } from "@/components/site/avatar"
 import { CopyButton } from "@/components/site/code"
@@ -20,7 +20,7 @@ export function Hero() {
       <div className="stars" />
       <div className="relative mx-auto max-w-6xl px-4 pt-28 text-center sm:pt-36">
         <h1 className="font-heading text-[clamp(3rem,11vw,7.25rem)] leading-[0.95] font-bold tracking-[-0.025em]">
-          <span className="text-rainbow">animal-avatars</span>
+          <span className="text-rainbow">cute-avatars</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl font-heading text-xl font-medium text-balance text-muted-foreground sm:text-2xl">
           Cute, glossy, living animal avatars for React

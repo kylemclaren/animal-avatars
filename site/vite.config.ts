@@ -10,7 +10,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
       // The library is not on npm yet: the site runs on its local source.
-      "animal-avatars": path.resolve(import.meta.dirname, "../src/index.ts"),
+      "cute-avatars": path.resolve(import.meta.dirname, "../src/index.ts"),
     },
     // ../src would otherwise resolve the repo root's own React from
     // ../node_modules, and two copies of React break hooks.

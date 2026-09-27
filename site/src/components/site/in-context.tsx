@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react"
-import type { AnimalAvatarState, AnimalAvatarType } from "animal-avatars"
+import type { AnimalAvatarState, AnimalAvatarType } from "cute-avatars"
 import { ArrowUpIcon, HashIcon, MoonIcon } from "lucide-react"
 import { cn } from "cn"
 

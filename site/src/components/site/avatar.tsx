@@ -1,5 +1,5 @@
 import type { Ref } from "react"
-import { AnimalAvatar, type AnimalAvatarProps } from "animal-avatars"
+import { AnimalAvatar, type AnimalAvatarProps } from "cute-avatars"
 
 import { useResolvedTheme } from "@/hooks/use-resolved-theme"
 

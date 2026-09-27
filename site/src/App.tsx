@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import type { AnimalAvatarType } from "animal-avatars"
+import type { AnimalAvatarType } from "cute-avatars"
 
 import { Api } from "@/components/site/api"
 import { Footer } from "@/components/site/footer"

@@ -140,7 +140,7 @@ let pillW = 0;
 function measure() {
   ctx.font = TITLE_FONT;
   ctx.letterSpacing = '-1.5px';
-  const tw = ctx.measureText('animal-avatars').width;
+  const tw = ctx.measureText('cute-avatars').width;
   ctx.letterSpacing = '0px';
   ctx.font = SUB_FONT;
   const sw = ctx.measureText('Cute, glossy, living animal avatars for React').width;
@@ -180,12 +180,12 @@ function drawPlate() {
   ctx.textBaseline = 'alphabetic';
   ctx.font = TITLE_FONT;
   ctx.letterSpacing = '-1.5px';
-  const tw = ctx.measureText('animal-avatars').width;
+  const tw = ctx.measureText('cute-avatars').width;
   const tg = ctx.createLinearGradient(W / 2 - tw / 2, 0, W / 2 + tw / 2, 0);
   INK.title.forEach((c, i) => tg.addColorStop([0, 0.35, 0.65, 1][i], c));
   ctx.fillStyle = tg;
   const ty = y + 38 + 60;
-  ctx.fillText('animal-avatars', W / 2, ty);
+  ctx.fillText('cute-avatars', W / 2, ty);
   ctx.letterSpacing = '0px';
 
   ctx.font = SUB_FONT;

@@ -1,5 +1,5 @@
 import { Fragment, type ReactNode } from "react"
-import * as lib from "animal-avatars"
+import * as lib from "cute-avatars"
 
 import { CodeBlock } from "@/components/site/code"
 import { SectionHeading } from "@/components/site/section-heading"
@@ -8,7 +8,7 @@ import { INSTALL_COMMAND, cast, pick } from "@/lib/cast"
 import { GROUPS, groupOfProp } from "@/lib/playground"
 import { describeDefault, eyeStyleKeys, propDocs, type PropDoc } from "@/lib/props-doc"
 
-const USAGE = `import { AnimalAvatar } from 'animal-avatars'
+const USAGE = `import { AnimalAvatar } from 'cute-avatars'
 
 export function Assistant({ busy }: { busy: boolean }) {
   return (

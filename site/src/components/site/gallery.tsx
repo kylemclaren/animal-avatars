@@ -1,5 +1,5 @@
 import { useState } from "react"
-import type { AnimalAvatarType } from "animal-avatars"
+import type { AnimalAvatarType } from "cute-avatars"
 import { cn } from "cn"
 
 import { Avatar } from "@/components/site/avatar"

@@ -1,5 +1,5 @@
 {
-  "name": "animal-avatars",
+  "name": "cute-avatars",
   "version": "0.1.0",
   "description": "Animated animal avatars for React: sixteen glossy 3D animals, from a tiger to a whale, with living faces that turn, hop and sleep. 2D canvas, no WebGL.",
   "type": "module",

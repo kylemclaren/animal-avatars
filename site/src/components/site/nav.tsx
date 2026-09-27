@@ -42,7 +42,7 @@ export function Nav() {
           className="-ml-1 flex items-center gap-2 rounded-lg px-1 py-1 font-heading text-lg font-semibold tracking-[-0.01em] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <Avatar type={cast[0]} size={26} aria-hidden />
-          animal-avatars
+          cute-avatars
         </a>
         <nav aria-label="Sections" className="ml-auto hidden items-center gap-0.5 md:flex">
           {LINKS.map((l) => (
@@ -61,7 +61,7 @@ export function Nav() {
             href={GITHUB_URL}
             target="_blank"
             rel="noreferrer"
-            aria-label="animal-avatars on GitHub"
+            aria-label="cute-avatars on GitHub"
             className={buttonVariants({ variant: "ghost", size: "icon" })}
           >
             <GitHubIcon className="size-[18px]" />

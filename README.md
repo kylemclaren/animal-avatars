@@ -1,9 +1,9 @@
-# animal-avatars
+# cute-avatars
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.gif">
   <source media="(prefers-color-scheme: light)" srcset="docs/hero-light.gif">
-  <img alt="animal-avatars: sixteen animated animals, from a tiger to a whale" src="docs/hero-light.gif">
+  <img alt="cute-avatars: sixteen animated animals, from a tiger to a whale" src="docs/hero-light.gif">
 </picture>
 
 Animated animal avatars for React. Sixteen glossy 3D animals, from a tiger to a whale, with living faces that blink, look toward the pointer, turn, hop and fall asleep. Drawn on a 2D canvas, no WebGL.
@@ -11,11 +11,11 @@ Animated animal avatars for React. Sixteen glossy 3D animals, from a tiger to a 
 **[Try them live →](https://animal-avatars.fly.dev)** Play with every prop, see them in a chat and a team list, and read the API.
 
 ```bash
-npm install animal-avatars
+npm install cute-avatars
 ```
 
 ```tsx
-import { AnimalAvatar } from 'animal-avatars';
+import { AnimalAvatar } from 'cute-avatars';
 
 <AnimalAvatar type="panda" size={64} />
 <AnimalAvatar type="owl" state="thinking" />

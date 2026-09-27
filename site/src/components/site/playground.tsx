@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react"
-import { animalAvatarPalette, animalAvatarPresets, autoInk, type AnimalAvatarType } from "animal-avatars"
+import { animalAvatarPalette, animalAvatarPresets, autoInk, type AnimalAvatarType } from "cute-avatars"
 import { ArrowUpIcon, RotateCcwIcon } from "lucide-react"
 import { cn } from "cn"
 
@@ -64,7 +64,7 @@ export function Playground({
   const resetAll = () => setValues((v) => initialValues(v.type))
 
   const jsx = toJsx(values)
-  const code = `import { AnimalAvatar } from 'animal-avatars'\n\n${jsx}`
+  const code = `import { AnimalAvatar } from 'cute-avatars'\n\n${jsx}`
   const changed = changedIn(values, CONTROLS.map((c) => c.prop))
   const pristine = JSON.stringify(values) === JSON.stringify(initialValues(values.type))
 
