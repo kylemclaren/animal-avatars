@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useId, useImperativeHandle, useLayoutEffect, useRef, type CSSProperties, type MouseEvent } from 'react';
 import type { AnimalAvatarProps, AnimalAvatarShading, AnimalAvatarState, AnimalAvatarType } from './types';
 import { animalAvatarPresets, stateLabels } from './presets';
-import { SHAPE_PATHS, SHAPE_PARTS, SHAPE_MARKINGS } from './shapes';
+import { SHAPE_PATHS, SHAPE_PARTS, SHAPE_BACK, SHAPE_MARKINGS } from './shapes';
 import { autoInk, shade } from './color';
 import { Sim, restPose } from './engine';
 import { draw, OVERSCAN, RISE, type DrawConfig } from './draw';
@@ -134,6 +134,7 @@ export const AnimalAvatar = forwardRef<HTMLCanvasElement, AnimalAvatarProps>(fun
     mouth: preset.mouth,
     partsColor: preset.partsColor,
     partsDepth: preset.partsDepth,
+    back: typeof Path2D !== 'undefined' ? SHAPE_BACK[kind]?.map((l) => ({ path: bodyPath(l.d), color: l.color, depth: l.depth })) : undefined,
   };
 
   /* the surface: an ancestor's say, else the system's */

@@ -8,7 +8,8 @@ export {
   animalAvatarFaces,
   animalAvatarStates,
 } from './presets';
-export { SHAPE_PATHS as animalAvatarShapes, SHAPE_PARTS as animalAvatarParts, SHAPE_MARKINGS as animalAvatarMarkings } from './shapes';
+export { SHAPE_PATHS as animalAvatarShapes, SHAPE_PARTS as animalAvatarParts, SHAPE_BACK as animalAvatarBack, SHAPE_MARKINGS as animalAvatarMarkings } from './shapes';
+export { drawConfigFor as animalAvatarDrawConfig } from './config';
 export { autoInk, luminance, parseColor, shade } from './color';
 export { Sim as AnimalAvatarSim, restPose } from './engine';
 export { draw as drawAnimalAvatarFrame, OVERSCAN as ANIMAL_AVATAR_OVERSCAN, RISE as ANIMAL_AVATAR_RISE } from './draw';

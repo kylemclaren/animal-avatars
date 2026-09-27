@@ -1,7 +1,7 @@
 /* Close-ups for tuning: /review.html?a=owl,lion&size=220&light */
 import { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { AnimalAvatarSim, drawAnimalAvatarFrame, animalAvatarTypes, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarPose, type AnimalAvatarState, type AnimalAvatarType } from '../src';
+import { AnimalAvatarSim, animalAvatarDrawConfig, drawAnimalAvatarFrame, animalAvatarTypes, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarPose, type AnimalAvatarState, type AnimalAvatarType } from '../src';
 
 const DEG = Math.PI / 180;
 const q = new URLSearchParams(location.search);
@@ -37,12 +37,8 @@ function Shot({ type, state, pose, face }: { type: AnimalAvatarType; state: Anim
     c.width = c.height = Math.round(SIZE * ANIMAL_AVATAR_OVERSCAN * dpr);
     const ctx = c.getContext('2d')!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawAnimalAvatarFrame(ctx, SIZE, { ...restPose(state), ...pose } as AnimalAvatarPose, {
-      path: new Path2D(animalAvatarShapes[type]), face: face ?? p.face, faceX: p.faceX, faceY: p.faceY, faceScale: p.faceScale,
-      color: p.color, ink: autoInk(p.color), shading, typeKey: type, still: true, dpr, theme: q.has('light') ? 'light' : 'dark',
-      parts: animalAvatarParts[type] ? new Path2D(animalAvatarParts[type] as string) : undefined, partsColor: p.partsColor, partsDepth: p.partsDepth,
-      markings: animalAvatarMarkings[type], dome: p.dome, eyes: p.eyes, mouth: p.mouth,
-    });
+    drawAnimalAvatarFrame(ctx, SIZE, { ...restPose(state), ...pose } as AnimalAvatarPose,
+      animalAvatarDrawConfig(type, { face: face ?? p.face, shading, still: true, dpr, theme: q.has('light') ? 'light' : 'dark' }));
   }, [type, state, pose, face]);
   const css = SIZE * ANIMAL_AVATAR_OVERSCAN;
   return <canvas ref={ref} style={{ width: css, height: css, margin: -css * 0.13 }} />;

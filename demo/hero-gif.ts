@@ -9,6 +9,7 @@
 import {
   AnimalAvatarSim,
   drawAnimalAvatarFrame,
+  animalAvatarDrawConfig,
   animalAvatarTypes,
   animalAvatarStates,
   animalAvatarPresets,
@@ -77,12 +78,7 @@ for (let row = -1; row <= 5; row++) {
       y: row * CELL_Y + 22,
       sim,
       canvas,
-      cfg: {
-        path: new Path2D(animalAvatarShapes[type]), face: p.face, faceX: p.faceX, faceY: p.faceY, faceScale: p.faceScale,
-        color: p.color, ink: autoInk(p.color), shading: 'plastic', typeKey: type, still: true, dpr: 1, theme,
-        parts: animalAvatarParts[type] ? new Path2D(animalAvatarParts[type] as string) : undefined, partsColor: p.partsColor, partsDepth: p.partsDepth,
-        markings: animalAvatarMarkings[type], dome: p.dome, eyes: p.eyes, mouth: p.mouth,
-      },
+      cfg: animalAvatarDrawConfig(type, { shading: 'plastic', still: true, dpr: 1, theme }),
     });
   }
 }

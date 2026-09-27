@@ -35,15 +35,15 @@ import { AnimalAvatar } from 'animal-avatars';
 | `chameleon` | green     | a casque, rolling turret eyes, a curled tail | a long smile, and a tongue that shoots out |
 | `penguin`   | navy      | a heart-shaped white face, a crest curl     | an orange beak              |
 | `pig`       | pink      | a snout with nostrils, pointed ears         | a small smile               |
-| `lion`      | gold      | a big scalloped mane, a cream muzzle        | "ω" under a brown nose      |
+| `lion`      | gold      | a fuzzy two-tone mane of curling locks      | "ω" under a brown nose      |
 | `octopus`   | coral     | spots, five curly tentacles                 | a small smile               |
 | `owl`       | caramel   | feather tufts, rimmed facial discs          | a golden beak               |
 | `sheep`     | cream     | a fluffy fleece, a peach face, tan ears     | "ω" under a pink nose       |
 | `whale`     | sky blue  | a curling tail, a water spout, a pale belly | a long smile                |
 | `monkey`    | brown     | round ears, a peach heart of a face         | a grin                      |
-| `llama`     | tan       | leaf-shaped ears, a fluffy topknot          | "ω" under a little nose     |
+| `llama`     | tan       | banana ears, fluffy bangs, eyelashes        | "ω" under slit nostrils     |
 | `koala`     | grey      | big fluffy ears, a big dark nose            | "ω"                         |
-| `fox`       | red       | tall pointed ears, a white ruff             | "ω" under a black nose      |
+| `fox`       | orange    | black-tipped ears, tufted white cheeks      | "ω" under a black nose      |
 
 Each head's front is a gentle dome. The eyes, the mouth and the markings (stripes, muzzles, patches, spots) all sit on it, so they turn together with the head. A beak is a feature rather than an expression, so it shows with either `face`, and it opens while working.
 

@@ -95,6 +95,8 @@ export interface AnimalAvatarEyeStyle {
   irisSize?: number;
   /** the eyes roll on their own, each its own way (a chameleon's) */
   roll?: boolean;
+  /** two lashes flicking off each open eye (a llama's) */
+  lashes?: boolean;
 }
 
 export interface AnimalAvatarPreset {

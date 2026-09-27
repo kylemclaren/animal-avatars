@@ -124,6 +124,66 @@ const blush = (cx, cy, dx, rx = 6, ry = 3.4, color = BLUSH) => ({ color, polys: 
 /* three whisker dots on each side of a muzzle */
 const whiskerDots = (cx, cy, dx, color) => ({ color, polys: [[-1, -1.6], [-2.6, 1.2], [0.6, 1.8]].flatMap(([x, y]) => [ring(cx - dx + x, cy + y, 0.95, 0.95, 12), ring(cx + dx - x, cy + y, 0.95, 0.95, 12)]) });
 
+/* a rounded polygon as a polyline, for markings: each corner a fillet
+   of radius r (a number, or one per corner) */
+function roundedPolyPts(points, radius, seg = 6) {
+  const n = points.length, out = [];
+  for (let i = 0; i < n; i++) {
+    const p = points[(i - 1 + n) % n], v = points[i], q = points[(i + 1) % n];
+    const r = Array.isArray(radius) ? radius[i] : radius;
+    const u1 = norm(sub(p, v)), u2 = norm(sub(q, v));
+    const alpha = Math.acos(Math.max(-1, Math.min(1, u1[0] * u2[0] + u1[1] * u2[1])));
+    let t = r / Math.tan(alpha / 2), rr = r;
+    const maxT = Math.min(len(sub(p, v)), len(sub(q, v))) / 2 - 0.01;
+    if (t > maxT) { t = maxT; rr = t * Math.tan(alpha / 2); }
+    const a = add(v, mul(u1, t)), b = add(v, mul(u2, t));
+    const c = add(v, mul(norm(add(u1, u2)), rr / Math.sin(alpha / 2)));
+    let a0 = Math.atan2(a[1] - c[1], a[0] - c[0]), a1 = Math.atan2(b[1] - c[1], b[0] - c[0]);
+    let d = a1 - a0;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    for (let k = 0; k <= seg; k++) { const th = a0 + (d * k) / seg; out.push([c[0] + rr * Math.cos(th), c[1] + rr * Math.sin(th)]); }
+  }
+  return out;
+}
+/* a seeded random, for shapes that should look hand-made but never change */
+const seeded = (seed) => { let a = seed >>> 0 || 1; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = Math.imul(a ^ (a >>> 15), a | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+/* a fuzzy ring: n tufts round a circle of radius R, each a pointed flame
+   reaching out by about `amp` (every one a little different), its tip
+   leaning round by `lean`, as if the fur were brushed */
+function fuzzyRing(cx, cy, R, n, amp, seed, lean = 0.3, phase = 0, soft = 1.8) {
+  const rnd = seeded(seed), out = [], per = 10, pk = 0.5 + lean / 2;
+  for (let i = 0; i < n; i++) {
+    const a = amp * (0.7 + 0.6 * rnd());
+    for (let k = 0; k < per; k++) {
+      const u = k / per, th = phase + (2 * Math.PI * (i + u)) / n - Math.PI / 2;
+      const d = u < pk ? u / pk : (1 - u) / (1 - pk);
+      /* soft < 1 rounds the tips; the ease keeps the valleys soft too */
+      const e = d * d * (3 - 2 * d);
+      const r = R + a * Math.pow(e, soft);
+      out.push([cx + r * Math.cos(th), cy + r * Math.sin(th)]);
+    }
+  }
+  return out;
+}
+
+/* a ring of locks, for a mane: n tapered tufts leaving a disc of radius
+   R, each curving round the same way as it goes out (so the whole mane
+   swirls), with a soft round tip; lengths and bends vary a little */
+function locks(cx, cy, R, n, reach, width, curl, seed, phase = 0) {
+  const rnd = seeded(seed);
+  let d = circleAt(cx, cy, R);
+  for (let i = 0; i < n; i++) {
+    const th = phase + (2 * Math.PI * i) / n - Math.PI / 2;
+    const L = reach * (0.8 + 0.4 * rnd()), bend = curl * (0.8 + 0.4 * rnd());
+    const out = [Math.cos(th), Math.sin(th)], side = [-Math.sin(th), Math.cos(th)];
+    const at = (r, s) => [cx + out[0] * r + side[0] * s, cy + out[1] * r + side[1] * s];
+    const p0 = at(R - 7, 0), p1 = at(R + L * 0.45, L * bend * 0.15), p2 = at(R + L * 0.8, L * bend * 0.55), p3 = at(R + L, L * bend);
+    d += polyPath(tube(cub(p0, p1, p2, p3), (t) => width * (1 - 0.72 * t), 16));
+  }
+  return d;
+}
+
 /* ── Tiger ──────────────────────────────────────────────────────────── */
 /* A wide round head with two round ears: stripes, a cream muzzle with
    whisker dots, peach inner ears, a pink nose. */
@@ -218,10 +278,13 @@ const pigMarks = [
 ];
 
 /* ── Lion ───────────────────────────────────────────────────────────── */
-/* A golden head with round ears, in a scalloped mane (a part, behind);
-   a cream muzzle with whisker dots, a brown nose. */
+/* A golden head with round ears, in a fuzzy mane of curling locks: a
+   deep rust layer of long ones at the back and a lighter layer of shorter
+   ones before it, all swirling the same way (parts, behind the head); a
+   cream muzzle with whisker dots, a brown nose. */
 const lion = circleAt(50, 57, 29) + circleAt(29, 35, 8) + circleAt(71, 35, 8);
-const lionParts = circleAt(50, 56, 38) + circlesOnRing(50, 56, 37, 12, 14, -90, 270);
+const lionBack = [{ color: "#C4572A", depth: 0.45, d: locks(50, 56, 35, 26, 9.5, 15, 0.5, 7) }];
+const lionParts = locks(50, 56, 31, 20, 6.5, 13.5, 0.5, 3, 0.16);
 const lionMarks = [
   { color: "#EE9A4C", polys: [ring(29, 35, 4.2, 4.2, 24), ring(71, 35, 4.2, 4.2, 24)] },
   { color: "#FFF3DC", polys: [ring(43.5, 71, 8.5), ring(56.5, 71, 8.5)] },
@@ -311,17 +374,20 @@ const monkeyMarks = [
 ];
 
 /* ── Llama ──────────────────────────────────────────────────────────── */
-/* A long face with leaf-shaped ears curving up and out, a fluffy topknot, a
-   cream muzzle with a little nose. */
-const llamaEarL = cub([35, 37], [27, 28], [21, 18], [21, 8]), llamaEarR = cub([65, 37], [73, 28], [79, 18], [79, 8]);
-const llamaTuft = circleAt(39, 27, 9) + circleAt(50, 22, 10) + circleAt(61, 27, 9) + circleAt(44.5, 31, 8) + circleAt(55.5, 31, 8);
-const llama = ellipseAt(50, 60, 27, 31) + polyPath(tube(llamaEarL, (t) => 12 + 3 * Math.sin(Math.PI * t) - 4 * t, 16)) + polyPath(tube(llamaEarR, (t) => 12 + 3 * Math.sin(Math.PI * t) - 4 * t, 16)) + llamaTuft;
+/* A long face, fuller at the muzzle; a big fluffy topknot whose bangs
+   hang over the forehead in scallops; banana ears curving out, pink
+   inside; a long cream muzzle with a llama's slit nostrils. */
+const llamaTuftAt = [[34, 35, 8], [41, 27, 9.5], [50, 23, 10.5], [59, 27, 9.5], [66, 35, 8], [39, 38, 8], [61, 38, 8], [50, 34, 11]];
+const llamaEarL = cub([32, 40], [22, 31], [14, 21], [17, 9]), llamaEarR = cub([68, 40], [78, 31], [86, 21], [83, 9]);
+const llamaEarW = (t) => 12 + 3.5 * Math.sin(Math.PI * t) - 5 * t;
+const llama = ellipseAt(50, 58, 26, 31) + ellipseAt(50, 74, 21.5, 16) + llamaTuftAt.map(([x, y, r]) => circleAt(x, y, r)).join("") +
+  polyPath(tube(llamaEarL, llamaEarW, 18)) + polyPath(tube(llamaEarR, llamaEarW, 18));
 const llamaMarks = [
-  { color: "#B98457", polys: [tube(cub([33, 33], [27, 26], [23, 19], [23, 12]), (t) => 5.5 + 1.5 * Math.sin(Math.PI * t) - 2 * t, 12), tube(cub([67, 33], [73, 26], [77, 19], [77, 12]), (t) => 5.5 + 1.5 * Math.sin(Math.PI * t) - 2 * t, 12)] },
-  { color: "#FFF4E4", polys: [ring(39, 27, 9), ring(50, 22, 10), ring(61, 27, 9), ring(44.5, 31, 8), ring(55.5, 31, 8)] },
-  { color: "#FFF0DC", polys: [ring(50, 76, 15, 11.5)] },
-  blush(50, 66, 17, 4.6, 2.8),
-  { color: "#6B4A3A", polys: [nose(50, 71.5, 6, 3.6)] },
+  { color: "#F2A9AE", polys: [tube(cub([30, 37], [23, 30], [17.5, 22], [19, 13]), (t) => 5.5 + 1.5 * Math.sin(Math.PI * t) - 2.5 * t, 14), tube(cub([70, 37], [77, 30], [82.5, 22], [81, 13]), (t) => 5.5 + 1.5 * Math.sin(Math.PI * t) - 2.5 * t, 14)] },
+  { color: "#FFF4E4", polys: llamaTuftAt.map(([x, y, r]) => ring(x, y, r)) },
+  { color: "#FFF0DC", polys: [ring(50, 76, 18.5, 14)] },
+  blush(50, 67, 18, 4.6, 2.8),
+  { color: "#6B4A3A", polys: [ringRot(46.2, 70, 1.1, 2.6, -0.6, 14), ringRot(53.8, 70, 1.1, 2.6, 0.6, 14)] },
 ];
 
 /* ── Koala ──────────────────────────────────────────────────────────── */
@@ -336,20 +402,22 @@ const koalaMarks = [
 ];
 
 /* ── Fox ────────────────────────────────────────────────────────────── */
-/* Wide cheeks to a pointed chin, tall pointed ears with pale insides;
-   a white ruff across the cheeks and chin, a small black nose. */
-const fox = ellipseAt(50, 56, 35, 27) + roundedPolygon([[22, 62], [78, 62], [50, 90]], 9) +
-  roundedPolygon([[16, 46], [20, 6], [45, 30]], 5) + roundedPolygon([[84, 46], [55, 30], [80, 6]], 5);
-const tri = (a, b, c, k) => {
-  /* a triangle drawn in toward its middle by k, for an inner ear */
-  const m = [(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3];
-  return [a, b, c].map((p) => add(m, mul(sub(p, m), k)));
-};
+/* A round crown, cheeks that flare into pointed tufts of fur, a pointed
+   chin; tall ears with black tips and soft cream insides. The lower face
+   is white, rising under the eyes, with the orange coming down between
+   them to the nose. */
+/* listed clockwise on screen, like the head's arcs, so the two union */
+const foxCheeks = [[77, 48], [95, 58], [83, 62], [93, 70], [75, 72], [61, 84], [50, 90], [39, 84], [25, 72], [7, 70], [17, 62], [5, 58], [23, 48]];
+const foxEarL = [[16, 47], [19, 4], [46, 29]], foxEarR = [[84, 47], [54, 29], [81, 4]];
+const fox = ellipseAt(50, 50, 31, 24) + roundedPolygon(foxCheeks, (i) => [6, 1.5, 3, 1.5, 4, 8, 7, 8, 4, 1.5, 3, 1.5, 6][i]) +
+  roundedPolygon(foxEarL, 5.5) + roundedPolygon(foxEarR, 5.5);
 const foxMarks = [
-  { color: "#FFE7D6", polys: [tri([19, 40], [22, 12], [40, 29], 0.72), tri([81, 40], [60, 29], [78, 12], 0.72)] },
-  { color: "#FFF6EE", polys: [ringRot(33, 71, 15, 9, 0.45), ringRot(67, 71, 15, 9, -0.45), ring(50, 80, 10, 8)] },
-  blush(50, 66, 21, 4.6, 2.8),
-  { color: "#2E2226", polys: [ring(50, 78.5, 4, 2.8, 24)] },
+  { color: "#FFE9D8", polys: [roundedPolyPts([[21, 41], [21.5, 14], [40, 30]], 4), roundedPolyPts([[79, 41], [60, 30], [78.5, 14]], 4)] },
+  /* black tips: the top of each ear, cut off by the ear's own edge */
+  { color: "#3A2420", polys: [[[0, 0], [40, 0], [40, 16], [22, 21], [0, 17]], [[100, 0], [60, 0], [60, 16], [78, 21], [100, 17]]] },
+  { color: "#FFF7F0", polys: [[[0, 57], [16, 58], [28, 61], [36, 64], [43, 69], [50, 71], [57, 69], [64, 64], [72, 61], [84, 58], [100, 57], [100, 100], [0, 100]]] },
+  blush(50, 67, 20, 4.8, 2.8),
+  { color: "#2E2226", polys: [ring(50, 72.3, 4.4, 3.1, 24)] },
 ];
 
 /* ── Out ────────────────────────────────────────────────────────────── */
@@ -357,6 +425,9 @@ const shapes = { tiger, elephant, panda, bunny, chameleon, penguin, pig, lion, o
 
 /* Parts drawn behind the head with less depth than it. */
 const parts = { panda: pandaParts, chameleon: chameleonParts, lion: lionParts, octopus: octopusParts, sheep: sheepParts, whale: whaleParts };
+
+/* Layers further behind still, back to front, each its own colour and depth. */
+const back = { lion: lionBack };
 
 const markings = {
   tiger: tigerMarks, elephant: elephantMarks, panda: pandaMarks, bunny: bunnyMarks, chameleon: chameleonMarks,
@@ -374,6 +445,8 @@ export const SHAPE_PATHS: Record<AnimalAvatarType, string> = {
 for (const [k, v] of Object.entries(shapes)) ts += `  ${k}: '${v}',\n`;
 ts += "};\n\n/** Parts drawn behind the head with a fraction of its depth. */\nexport const SHAPE_PARTS: Partial<Record<AnimalAvatarType, string>> = {\n";
 for (const [k, v] of Object.entries(parts)) ts += `  ${k}: '${v}',\n`;
+ts += "};\n\n/** Layers behind the parts, back to front, each with its own colour and share of the depth. */\nexport const SHAPE_BACK: Partial<Record<AnimalAvatarType, { d: string; color: string; depth: number }[]>> = {\n";
+for (const [k, v] of Object.entries(back)) ts += `  ${k}: [\n${v.map((l) => `    { color: '${l.color}', depth: ${l.depth}, d: '${l.d}' },\n`).join("")}  ],\n`;
 ts += "};\n\n/** Markings (stripes, muzzles) printed on the front under the face: a colour and its outlines, each a flat x, y list, all wound the same way. */\nexport const SHAPE_MARKINGS: Record<AnimalAvatarType, { color: string; polys: number[][] }[]> = {\n";
 const flat = (poly) => `[${cw(poly).map((q) => `${f(q[0])},${f(q[1])}`).join(",")}]`;
 for (const [k, v] of Object.entries(markings)) ts += `  ${k}: [\n${v.map((m) => `    { color: '${m.color}', polys: [${m.polys.map(flat).join(", ")}] },\n`).join("")}  ],\n`;

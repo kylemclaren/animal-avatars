@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { AnimalAvatar, animalAvatarTypes, animalAvatarStates, drawAnimalAvatarFrame, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarState, type AnimalAvatarType } from '../src';
+import { AnimalAvatar, animalAvatarDrawConfig, animalAvatarTypes, animalAvatarStates, drawAnimalAvatarFrame, animalAvatarPresets, animalAvatarShapes, animalAvatarParts, animalAvatarMarkings, autoInk, restPose, ANIMAL_AVATAR_OVERSCAN, type AnimalAvatarState, type AnimalAvatarType } from '../src';
 
 const DEG = Math.PI / 180;
 const ANIMALS: AnimalAvatarType[] = animalAvatarTypes;
@@ -20,12 +20,7 @@ function TurnStrip({ type, size = 96, state = 'default' }: { type: AnimalAvatarT
       const ctx = c.getContext('2d')!;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const pose = { ...restPose(state), yaw: yaw * DEG };
-      drawAnimalAvatarFrame(ctx, size, pose, {
-        path: new Path2D(animalAvatarShapes[type]), face: p.face, faceX: p.faceX, faceY: p.faceY, faceScale: p.faceScale,
-        color: p.color, ink: autoInk(p.color), shading: 'plastic', typeKey: type, still: true, dpr,
-        parts: animalAvatarParts[type] ? new Path2D(animalAvatarParts[type] as string) : undefined, partsColor: p.partsColor, partsDepth: p.partsDepth,
-        markings: animalAvatarMarkings[type], dome: p.dome, eyes: p.eyes, mouth: p.mouth,
-      });
+      drawAnimalAvatarFrame(ctx, size, pose, animalAvatarDrawConfig(type, { shading: 'plastic', still: true, dpr }));
     });
   }, [type, size, state]);
   const css = size * ANIMAL_AVATAR_OVERSCAN;

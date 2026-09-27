@@ -37,6 +37,9 @@ export interface DrawConfig {
   partsDepth?: number;
   /** the parts' own colour; omitted, they take the body's */
   partsColor?: string;
+  /** layers further behind still, back to front, each with its own colour
+      and share of the depth: the dark back of a lion's mane */
+  back?: { path: Path2D; color: string; depth: number }[];
   /** the animal's mouth: the "ω" under a nose, a long smile, or none;
       hung from `y` in the body box */
   mouth?: AnimalAvatarMouth;
@@ -390,6 +393,7 @@ export function draw(ctx: CanvasRenderingContext2D, box: number, pose: Pose, cfg
   /* the far half of the whirl sits behind everything */
   drawWhirl(ctx, pose, cfg.color, lx, ly, false, cfg.whirl);
 
+  cfg.back?.forEach((l, i) => drawSolid(l.path, `${cfg.typeKey ?? 'custom'}:back${i}`, halfDepth * l.depth, l.color, palette(l.color, shadow, highlight)));
   if (cfg.parts) {
     /* parts can wear their own colour: a panda's black ears */
     const pc = cfg.partsColor;
@@ -743,6 +747,24 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
       ctx.strokeStyle = es.color ?? ink;
       ctx.lineWidth = w;
       ctx.stroke(eyePath(x0, y0, cy));
+      /* lashes: two flicks off the top outer edge of an open eye */
+      if (es.lashes && kOpen * e > 0.05) {
+        const hw = w / 2, hh = 1.1 * tall * eTall + hw;
+        const a = ctx.globalAlpha;
+        ctx.globalAlpha = a * Math.min(1, kOpen * e * 1.5);
+        ctx.lineWidth = Math.max(minLine * 0.8, 1.15);
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        for (const [deg, len, out] of [[58, 0.55, 0.72], [24, 0.48, 0.5]]) {
+          const t = (deg * Math.PI) / 180, px = side * hw * Math.cos(t), py = -hh * Math.sin(t);
+          const dx = side * Math.cos(t * out), dy = -Math.sin(t) - 0.35;
+          const n = Math.hypot(dx, dy);
+          ctx.moveTo(px, py);
+          ctx.lineTo(px + (dx / n) * hw * len, py + (dy / n) * hw * len);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = a;
+      }
       /* catchlights: they fade out as the lid comes down, and sit toward
          the light rather than following the look */
       const a = kOpen * e * e;
