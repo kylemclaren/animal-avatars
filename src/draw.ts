@@ -499,6 +499,35 @@ export function draw(ctx: CanvasRenderingContext2D, box: number, pose: Pose, cfg
        pixel, so a sleeping lid or a mouth still reads at 32px */
     drawFace(ctx, pose, cfg, place, 1.1 / ((box / 100) * cfg.faceScale));
     ctx.restore();
+    /* a chameleon's tongue: it leaves the mouth and reaches out past the
+       head toward the side it faces, so it is drawn over everything, not
+       clipped to the front */
+    if (cfg.mouth?.snap && Math.abs(pose.tongue) > 0.01) {
+      const m = [0, 0];
+      front(cfg.faceX, cfg.mouth.y + 1.5, m);
+      const side = Math.sign(pose.tongue), reach = Math.abs(pose.tongue);
+      const L = 54 * reach, a = 0.2;
+      const tx = m[0] + side * Math.cos(a) * L, ty = m[1] + Math.sin(a) * L;
+      const [ca, cb, cc, cd, ce, cf] = body;
+      ctx.save();
+      ctx.setTransform(ca, cb, cc, cd, ce, cf);
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#F07A93';
+      ctx.lineWidth = 4.6;
+      ctx.beginPath();
+      ctx.moveTo(m[0], m[1]);
+      ctx.quadraticCurveTo(m[0] + side * L * 0.5, m[1] - L * 0.04, tx, ty);
+      ctx.stroke();
+      ctx.fillStyle = '#E2557A';
+      ctx.beginPath();
+      ctx.arc(tx, ty, 5.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath();
+      ctx.arc(tx - 1.8, ty - 1.9, 1.7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
   }
   /* the near half of the whirl passes in front of the face */
   drawWhirl(ctx, pose, cfg.color, lx, ly, true, cfg.whirl);
@@ -656,8 +685,25 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
     const cy = kOpen * -3.3 * tall * eTall + kShut * 0.6 + kLaugh * (-11.4 - 4 * lift) + kSleep * (5.4 + 2 * sag);
     const w = Math.max(minLine, kOpen * EYE_RX * 2 * wide * eSize + kShut * 2.8 + kLaugh * 4.4 + kSleep * 4);
     /* the eyes drift toward the look when open, less so when shut */
-    const dx = lx * (kOpen + 0.5 * (kShut + kLaugh)), dy = ly * (kOpen + 0.5 * kShut);
+    let dx = lx * (kOpen + 0.5 * (kShut + kLaugh)), dy = ly * (kOpen + 0.5 * kShut);
+    /* rolling eyes: the right one wanders off on its own slow loop */
+    if (es.roll && side > 0) {
+      dx += (2.8 * Math.sin(pose.time * 0.83) - lx * 0.8) * kOpen;
+      dy += 1.8 * Math.sin(pose.time * 1.21 + 1) * kOpen;
+    }
     at(side * half + dx, ey + dy, () => {
+      if (es.iris && kOpen * e > 0.05) {
+        const a = ctx.globalAlpha;
+        ctx.globalAlpha = a * Math.min(1, kOpen * e * 1.4);
+        ctx.fillStyle = es.iris;
+        ctx.beginPath();
+        ctx.arc(0, 0, (w / 2) * (es.irisSize ?? 1.75), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.22)';
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+        ctx.globalAlpha = a;
+      }
       ctx.strokeStyle = es.color ?? ink;
       ctx.lineWidth = w;
       ctx.stroke(eyePath(x0, y0, cy));
@@ -690,7 +736,7 @@ function drawFace(ctx: CanvasRenderingContext2D, pose: Pose, cfg: DrawConfig, pl
     const kd = 1 + 0.08 * pose.breath;
     const hop = Math.max(0, -pose.y) / 26;
     /* working opens the mouth with each hop; happy beams, wider still */
-    const open = ww * (5.6 + 4 * hop) + wh * (4.8 + 4 * hop);
+    const open = ww * (5.6 + 4 * hop) + wh * (4.8 + 4 * hop) + (mo.snap ? 4.5 * Math.abs(pose.tongue) : 0);
     const lw = Math.max(minLine, b(1.55, 1.6, 1.35, 1.5, 1.6));
     /* thinking pulls the mouth small and off to the side it looks to */
     const hmm = wt * Math.max(-1, Math.min(1, lx / 3));

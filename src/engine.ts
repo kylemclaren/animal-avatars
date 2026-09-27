@@ -146,6 +146,8 @@ export interface Pose {
       its head is, in radians round the ring */
   whirl: number;
   whirlAngle: number;
+  /** a tongue shot's reach, 0 … 1, signed by the side it goes to */
+  tongue: number;
   /** seconds on the sim's own clock: what the states' flourishes (the
       thought bubbles, the sparkles) keep time by */
   time: number;
@@ -284,7 +286,7 @@ const JOY_HOP = 0.36;
 const JOY_H = 11;
 
 export class Sim {
-  readonly pose: Pose = { yaw: 0, pitch: 0, roll: 0, x: 0, y: 0, sx: 1, sy: 1, eyeOpen: 1, blinkL: 0, blinkR: 0, lookX: 0, lookY: 0, breath: 0, laugh: 0, whirl: 0, whirlAngle: 0, time: 0, w: [1, 0, 0, 0, 0] };
+  readonly pose: Pose = { yaw: 0, pitch: 0, roll: 0, x: 0, y: 0, sx: 1, sy: 1, eyeOpen: 1, blinkL: 0, blinkR: 0, lookX: 0, lookY: 0, breath: 0, laugh: 0, whirl: 0, whirlAngle: 0, tongue: 0, time: 0, w: [1, 0, 0, 0, 0] };
   state: AnimalAvatarState = 'default';
 
   private rand: () => number;
@@ -351,6 +353,10 @@ export class Sim {
   private joyPhase = 0;
   private peek = new Event(0.7);
   private peekAt = 0;
+  /* a tongue shot now and then, out toward the side the head faces */
+  private tongueEv = new Event(0.95);
+  private tongueAt = 0;
+  private tongueSide = 1;
 
   constructor(seed: number, state: AnimalAvatarState = 'default') {
     this.rand = rng(Math.floor(seed * 1e6) + 1);
@@ -370,6 +376,7 @@ export class Sim {
     this.nodAt = this.t + 3 + r() * 4;
     this.dartAt = this.t + 1 + r() * 2;
     this.laughAt = this.t + 0.6 + r() * 1.5;
+    this.tongueAt = this.t + 3 + r() * 4;
     this.setState(state, true);
   }
 
@@ -775,6 +782,21 @@ export class Sim {
       laugh = Math.max(laugh, (1 - open) * wh);
     }
 
+    /* a tongue shot, idle or working: out fast, a beat at full reach,
+       back a little slower. Only animals that have one draw it. */
+    if ((this.state === 'default' || this.state === 'working') && t >= this.tongueAt && !this.tongueEv.active && !this.flip.active) {
+      this.tongueEv.fire();
+      this.tongueSide = this.baseYaw > 0.05 ? 1 : this.baseYaw < -0.05 ? -1 : this.rand() < 0.5 ? -1 : 1;
+      this.tongueAt = t + (this.state === 'working' ? 2.5 + this.rand() * 2.5 : 5 + this.rand() * 5);
+    }
+    this.tongueEv.update(dt);
+    let reach = 0;
+    if (this.tongueEv.active) {
+      const q = this.tongueEv.p;
+      reach = q < 0.22 ? 1 - (1 - q / 0.22) ** 3 : q < 0.34 ? 1 : 1 - easeInOut((q - 0.34) / 0.66);
+    }
+    p.tongue = reach * this.tongueSide * (wd + ww);
+
     /* sleeping: the head drops, then jerks back up */
     if (this.state === 'sleeping' && t >= this.nodAt && !this.nod.active) {
       this.nod.fire();
@@ -860,6 +882,7 @@ export function restPose(state: AnimalAvatarState): Pose {
     laugh: state === 'happy' ? 1 : 0,
     whirl: 0,
     whirlAngle: 0,
+    tongue: 0,
     time: 0,
     w: STATES.map((s) => (s === state ? 1 : 0)) as Weights,
   };

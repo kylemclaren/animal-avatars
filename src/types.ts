@@ -60,6 +60,8 @@ export interface AnimalAvatarMouth {
   width?: number;
   height?: number;
   teeth?: boolean;
+  /** a long tongue that now and then shoots out and snaps back (a chameleon's) */
+  snap?: boolean;
   /** a beak's upper and lower colours */
   color?: string;
   shade?: string;
@@ -84,6 +86,11 @@ export interface AnimalAvatarEyeStyle {
   shine: number;
   /** size of the catchlight */
   shineSize: number;
+  /** a coloured iris round the pupil, and its size against the pupil */
+  iris?: string;
+  irisSize?: number;
+  /** the eyes roll on their own, each its own way (a chameleon's) */
+  roll?: boolean;
 }
 
 export interface AnimalAvatarPreset {

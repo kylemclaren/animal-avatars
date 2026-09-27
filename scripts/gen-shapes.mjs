@@ -185,9 +185,11 @@ const chameleon = ellipseAt(50, 58, 34, 29) + roundedPolygon([[31, 42], [50, 11]
 const spiral = (t) => { const th = 0.85 * Math.PI - t * 2.35 * Math.PI, r = 16 - 12.5 * t; return [84 + r * Math.cos(th), 76 + r * Math.sin(th)]; };
 const chameleonParts = polyPath(tube(spiral, (t) => 7.5 - 4.5 * t, 60));
 const chameleonMarks = [
-  { color: "#9BE7A0", polys: [ring(22, 50, 10.5), ring(78, 50, 10.5)] },
-  { color: "#4DB85B", polys: [ring(22, 50, 8), ring(78, 50, 8)] },
-  { color: "#9BE7A0", polys: [ring(22, 50, 6.2), ring(78, 50, 6.2)] },
+  /* the turrets: ridged cones of skin round each eye */
+  { color: "#9BE7A0", polys: [ring(22, 50, 11.2), ring(78, 50, 11.2)] },
+  { color: "#4DB85B", polys: [ring(22, 50, 9.6), ring(78, 50, 9.6)] },
+  { color: "#9BE7A0", polys: [ring(22, 50, 8.4), ring(78, 50, 8.4)] },
+  { color: "#4DB85B", polys: [ring(22, 50, 7.3), ring(78, 50, 7.3)] },
   { color: "#D9F59C", polys: [tube(cub([22, 66], [30, 86], [70, 86], [78, 66]), (t) => 3.2 + 1.6 * Math.sin(Math.PI * t), 30)] },
   { color: "#3E9E4C", polys: [tube(lineFn([50, 17], [50, 40]), (t) => 3 - 1.4 * t, 8)] },
   { color: "#F4E36A", polys: [ring(40, 32, 2.2, 2.2, 16), ring(60, 32, 2.2, 2.2, 16), ring(44, 22, 1.6, 1.6, 16), ring(56, 22, 1.6, 1.6, 16), ring(33, 67, 2, 2, 16), ring(67, 67, 2, 2, 16)] },

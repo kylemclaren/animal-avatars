@@ -23,6 +23,7 @@ const SHOTS: { label: string; state: AnimalAvatarState; pose: Partial<AnimalAvat
   { label: '-40°', state: 'default', pose: { yaw: -40 * DEG } },
   { label: 'working', state: 'working', pose: { y: -20 } },
   { label: 'sleeping', state: 'sleeping', pose: {} },
+  { label: 'tongue', state: 'default', pose: { tongue: 1, yaw: 14 * DEG, time: 2 } },
   { label: 'thinking', state: 'thinking', pose: lived('thinking', Number(q.get('think') ?? 2.6)) },
   { label: 'happy', state: 'happy', pose: lived('happy', Number(q.get('happy') ?? 0.55)) },
 ];
